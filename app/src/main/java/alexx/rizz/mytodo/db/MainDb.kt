@@ -1,6 +1,6 @@
 package alexx.rizz.mytodo.db
 
-import alexx.rizz.mytodo.features.todolist.*
+import alexx.rizz.mytodo.feature.todolist.*
 import androidx.room.*
 
 @Database(

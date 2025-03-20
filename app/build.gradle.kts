@@ -15,12 +15,12 @@ ksp {
 
 android {
   namespace = "alexx.rizz.mytodo"
-  compileSdk = 35
+  compileSdk = libs.versions.compileSdk.get().toInt()
 
   defaultConfig {
     applicationId = "alexx.rizz.mytodo"
-    minSdk = 22
-    targetSdk = 35
+    minSdk = libs.versions.minSdk.get().toInt()
+    targetSdk = libs.versions.targetSdk.get().toInt()
     versionCode = 1
     versionName = "0.0.1"
 
@@ -32,7 +32,7 @@ android {
 
   buildTypes {
     release {
-      isMinifyEnabled = false
+      isMinifyEnabled = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
   }

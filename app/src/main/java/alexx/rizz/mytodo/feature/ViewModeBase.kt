@@ -1,4 +1,4 @@
-package alexx.rizz.mytodo.features
+package alexx.rizz.mytodo.feature
 
 import androidx.lifecycle.*
 

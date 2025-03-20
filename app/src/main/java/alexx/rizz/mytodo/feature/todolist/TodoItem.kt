@@ -1,4 +1,4 @@
-package alexx.rizz.mytodo.features.todolist
+package alexx.rizz.mytodo.feature.todolist
 
 data class TodoItem(
   val id: Int,

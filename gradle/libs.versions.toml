@@ -1,4 +1,8 @@
 [versions]
+minSdk = "22"
+targetSdk = "35"
+compileSdk = "35"
+
 agp = "8.9.0"
 kotlin = "2.1.10"
 coreKtx = "1.15.0"
@@ -8,7 +12,7 @@ activityCompose = "1.10.1"
 composeBom = "2025.03.00"
 ksp = "2.1.10-1.0.31"
 room = "2.6.1"
-hilt = "2.55"
+hilt = "2.56"
 slf4j = "1.7.36" # slf4j 2.x not yet supported by logback-android
 logbackAndroid = "2.0.1"
 
@@ -24,7 +28,6 @@ androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
