@@ -10,6 +10,12 @@ private val LightColorScheme = lightColorScheme(
   primary = MyColors.Primary,
   secondary = MyColors.Secondary,
   tertiary = MyColors.Tertiary,
+  background = MyColors.Background,
+  surface = MyColors.Background,
+  // surfaceDim = MyColors.Background,
+  // surfaceTint = MyColors.Background,
+  // surfaceBright = MyColors.Background,
+  // surfaceVariant = MyColors.Background,
 )
 
 @Composable

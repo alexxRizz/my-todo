@@ -14,4 +14,7 @@ interface TodoDao {
 
   @Query("SELECT * FROM todos ORDER BY orderNumber")
   fun all(): Flow<List<TodoEntity>>
+
+  @Query("SELECT MAX(orderNumber) FROM todos")
+  suspend fun getMaxOrderNumber(): Int
 }

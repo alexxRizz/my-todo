@@ -1,5 +1,6 @@
 package alexx.rizz.mytodo.feature.todolist
 
+import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
 import alexx.rizz.mytodo.ui.*
 import alexx.rizz.mytodo.ui.theme.*
 import androidx.compose.foundation.layout.*
@@ -14,7 +15,9 @@ import androidx.compose.ui.draw.*
 import androidx.compose.ui.geometry.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.style.*
-import androidx.compose.ui.tooling.preview.*
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.compose.*
 import androidx.lifecycle.viewmodel.compose.*
@@ -28,8 +31,7 @@ fun TodoListScreen(
   TodoListScreenContent(
     modifier,
     screenState,
-    vm::onAddCategory,
-    vm::onAddTodo,
+    vm::onUserIntent,
   )
 }
 
@@ -37,31 +39,53 @@ fun TodoListScreen(
 private fun TodoListScreenContent(
   modifier: Modifier,
   screenState: TodoListScreenState,
-  onAddCategory: () -> Unit,
-  onAddTodo: () -> Unit,
+  onUserIntent: (UserIntent) -> Unit,
 ) {
-  if (screenState.isLoading) {
-    Column(
-      modifier
-        .fillMaxSize()
-        .padding(10.dp),
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center,
-    ) {
-      CircularProgressIndicator(
-        modifier = Modifier.width(64.dp),
-        color = Color.White,
-        trackColor = MyColors.Primary,
-      )
-    }
-    return
+  when (screenState) {
+    TodoListScreenState.Loading -> TodoListLoading(modifier)
+    is TodoListScreenState.LoadedSuccessfully -> TodoListLoadedSuccessfully(modifier, screenState, onUserIntent)
   }
+}
+
+@Composable
+private fun TodoListLoading(modifier: Modifier) {
+  Column(
+    modifier
+      .fillMaxSize()
+      .padding(10.dp),
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center,
+  ) {
+    CircularProgressIndicator(
+      modifier = Modifier.width(64.dp),
+      color = Color.White,
+      trackColor = MyColors.Primary,
+    )
+  }
+}
+
+@Composable
+private fun TodoListLoadedSuccessfully(
+  modifier: Modifier,
+  screenState: TodoListScreenState.LoadedSuccessfully,
+  onUserIntent: (UserIntent) -> Unit,
+) {
   Column(modifier
     .fillMaxSize()
     .padding(10.dp)
   ) {
     TodoList(Modifier.weight(1f), screenState.items)
-    BottomActions(onAddCategory, onAddTodo)
+    BottomActions(
+      { onUserIntent(UserIntent.AddCategory) },
+      { onUserIntent(UserIntent.AddTodo) },
+    )
+    if (screenState.editDialog != null)
+      TodoItemEditDialog(
+        title = screenState.editDialog.title,
+        text = screenState.editDialog.text,
+        onCancel = { onUserIntent(UserIntent.CancelAdding) },
+        onOk = { onUserIntent(UserIntent.ConfirmAdding(it)) },
+      )
   }
 }
 
@@ -119,7 +143,7 @@ private fun TodoRow(
     Row(
       Modifier
         .fillMaxSize()
-        .padding(3.dp, 10.dp, 10.dp, 10.dp),
+        .padding(3.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Checkbox(
@@ -156,21 +180,21 @@ private fun BottomActions(
     horizontalArrangement = Arrangement.spacedBy(15.dp),
   ) {
     Button(
+      onClick = onAddCategory,
       modifier = Modifier.weight(1f),
       shape = RoundedCornerShape(10.dp),
       contentPadding = ButtonDefaults.ContentPadding.copy(top = 10.dp, bottom = 10.dp),
       colors = ButtonDefaults.buttonColors(containerColor = MyColors.Tertiary),
-      onClick = onAddCategory,
     ) {
       Icon(Icons.Default.Add, contentDescription = null)
       Spacer(Modifier.width(10.dp))
       Text("Категория", fontSize = 18.sp)
     }
     Button(
+      onClick = onAddTodo,
       modifier = Modifier.weight(1f),
       shape = RoundedCornerShape(10.dp),
       contentPadding = ButtonDefaults.ContentPadding.copy(top = 10.dp, bottom = 10.dp),
-      onClick = onAddTodo,
     ) {
       Icon(Icons.Default.Add, contentDescription = null)
       Spacer(Modifier.width(10.dp))
@@ -179,39 +203,30 @@ private fun BottomActions(
   }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun TodoListScreenPreview() {
-  TodoListScreenPreviewImpl(
-    TodoListScreenState(
+private class TodoListScreenPreviewParameterProvider : PreviewParameterProvider<TodoListScreenState> {
+  override val values = sequenceOf(
+    TodoListScreenState.Loading,
+    TodoListScreenState.LoadedSuccessfully(emptyList()),
+    TodoListScreenState.LoadedSuccessfully(
       List(20) {
         val i = it + 1
         val text = if (i % 3 == 0) "Lorem Ipsum is simply dummy text of the printing and typesetting industry." else "Todo $i"
-        TodoItem(i, i, text, isDone = i % 2 == 0)
+        TodoItem(text, isDone = i % 2 == 0, i)
       }
-    ))
+    )
+  )
 }
 
+@Composable
 @Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun EmptyTodoListScreenPreview() {
-  TodoListScreenPreviewImpl(TodoListScreenState(emptyList()))
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun LoadingTodoListScreenPreview() {
-  TodoListScreenPreviewImpl(TodoListScreenState(emptyList(), isLoading = true))
-}
-
-@Composable
-private fun TodoListScreenPreviewImpl(screenState: TodoListScreenState) {
+private fun TodoListScreenPreview(
+  @PreviewParameter(TodoListScreenPreviewParameterProvider::class) screenState: TodoListScreenState
+) {
   MyToDoTheme {
     TodoListScreenContent(
       Modifier.safeDrawingPadding(),
       screenState,
-      {},
-      {}
+      onUserIntent = {},
     )
   }
 }
