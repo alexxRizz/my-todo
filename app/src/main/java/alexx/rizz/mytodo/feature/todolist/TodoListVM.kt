@@ -1,10 +1,11 @@
 package alexx.rizz.mytodo.feature.todolist
 
 import alexx.rizz.mytodo.feature.*
+import alexx.rizz.mytodo.feature.todolist.ui.*
 import androidx.lifecycle.*
 import dagger.hilt.android.lifecycle.*
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.*
 import kotlin.time.Duration.Companion.seconds
 
@@ -18,13 +19,12 @@ class TodoListVM @Inject constructor(
     data object AddTodo : UserIntent
     data object CancelAdding : UserIntent
     data class ConfirmAdding(val todoText: String) : UserIntent
+    data class Done(val todoId: Int, val isDone: Boolean) : UserIntent
   }
 
   private val mEditDialogState = MutableStateFlow<TodoEditDialogState?>(null)
-  private var mAllItems = emptyList<TodoItem>()
 
   val screenState = combine(mTodoRep.getAll(), mEditDialogState) { allItems, editDialogState ->
-    mAllItems = allItems
     TodoListScreenState.LoadedSuccessfully(
       items = allItems,
       editDialog = editDialogState
@@ -35,19 +35,20 @@ class TodoListVM @Inject constructor(
     initialValue = TodoListScreenState.Loading
   )
 
-  private val mTodoList get() = (screenState.value as TodoListScreenState.LoadedSuccessfully).items
-
   fun onUserIntent(intent: UserIntent) =
-    UserIntentHandler().handle(intent)
+    viewModelScope.launch {
+      UserIntentHandler().handle(intent)
+    }
 
   private inner class UserIntentHandler {
 
-    fun handle(intent: UserIntent) {
+    suspend fun handle(intent: UserIntent) {
       when (intent) {
         UserIntent.AddCategory -> onAddCategory()
         UserIntent.AddTodo -> onAddTodo()
         UserIntent.CancelAdding -> onAddingCancelled()
         is UserIntent.ConfirmAdding -> onAddingConfirmed(intent)
+        is UserIntent.Done -> onToggleTodo(intent)
       }
     }
 
@@ -68,6 +69,10 @@ class TodoListVM @Inject constructor(
       viewModelScope.launch {
         mTodoRep.addTodo(TodoItem(intent.todoText, isDone = false))
       }
+    }
+
+    private suspend fun onToggleTodo(intent: UserIntent.Done) {
+      mTodoRep.done(intent.todoId, intent.isDone)
     }
 
     private fun showEditDialog(state: TodoEditDialogState) {

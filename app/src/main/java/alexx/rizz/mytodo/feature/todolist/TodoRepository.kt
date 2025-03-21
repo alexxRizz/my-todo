@@ -8,6 +8,7 @@ import javax.inject.*
 interface ITodoRepository {
   fun getAll(): Flow<List<TodoItem>>
   suspend fun addTodo(todo: TodoItem)
+  suspend fun done(todoId: Int, isDone: Boolean)
 }
 
 @Singleton
@@ -23,8 +24,12 @@ class TodoRepository @Inject constructor(
   override suspend fun addTodo(todo: TodoItem) {
     db.withTransaction {
       val maxOrderNumber = mDao.getMaxOrderNumber()
-      mDao.insert(todo.toEntity(maxOrderNumber + 1))
+      mDao.upsert(todo.toEntity(maxOrderNumber + 1))
     }
+  }
+
+  override suspend fun done(todoId: Int, isDone: Boolean) {
+    mDao.done(todoId, isDone)
   }
 }
 

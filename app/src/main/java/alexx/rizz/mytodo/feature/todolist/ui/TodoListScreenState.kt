@@ -1,4 +1,6 @@
-package alexx.rizz.mytodo.feature.todolist
+package alexx.rizz.mytodo.feature.todolist.ui
+
+import alexx.rizz.mytodo.feature.todolist.*
 
 sealed interface TodoListScreenState {
 

@@ -1,8 +1,10 @@
-package alexx.rizz.mytodo.feature.todolist
+package alexx.rizz.mytodo.feature.todolist.ui
 
+import alexx.rizz.mytodo.feature.todolist.*
 import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
 import alexx.rizz.mytodo.ui.*
 import alexx.rizz.mytodo.ui.theme.*
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.*
@@ -14,10 +16,10 @@ import androidx.compose.ui.*
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.geometry.*
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.hapticfeedback.*
+import androidx.compose.ui.platform.*
 import androidx.compose.ui.text.style.*
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.tooling.preview.*
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.compose.*
 import androidx.lifecycle.viewmodel.compose.*
@@ -74,7 +76,7 @@ private fun TodoListLoadedSuccessfully(
     .fillMaxSize()
     .padding(10.dp)
   ) {
-    TodoList(Modifier.weight(1f), screenState.items)
+    TodoList(Modifier.weight(1f), screenState.items, onDoneClick = { index, isDone -> onUserIntent(UserIntent.Done(index, isDone)) })
     BottomActions(
       { onUserIntent(UserIntent.AddCategory) },
       { onUserIntent(UserIntent.AddTodo) },
@@ -93,25 +95,12 @@ private fun TodoListLoadedSuccessfully(
 private fun TodoList(
   modifier: Modifier,
   items: List<TodoItem>,
+  onDoneClick: (Int, Boolean) -> Unit,
 ) {
-  if (items.isNotEmpty())
-    TodoListWithItems(modifier, items)
-  else
+  if (items.isEmpty())
     TodoListEmpty(modifier)
-}
-
-@Composable
-private fun TodoListWithItems(modifier: Modifier, items: List<TodoItem>) {
-  val todoListState = rememberLazyListState()
-  LazyColumn(
-    modifier,
-    state = todoListState,
-    verticalArrangement = Arrangement.spacedBy(7.dp)
-  ) {
-    items(items, key = { it.id }) {
-      TodoRow(it)
-    }
-  }
+  else
+    TodoListWithItems(modifier, items, onDoneClick)
 }
 
 @Composable
@@ -130,16 +119,44 @@ private fun TodoListEmpty(modifier: Modifier) {
 }
 
 @Composable
+private fun TodoListWithItems(
+  modifier: Modifier,
+  items: List<TodoItem>,
+  onDoneClick: (Int, Boolean) -> Unit,
+) {
+  val todoListState = rememberLazyListState()
+  LazyColumn(
+    modifier,
+    state = todoListState,
+    verticalArrangement = Arrangement.spacedBy(7.dp)
+  ) {
+    items(items, key = { it.id }) {
+      TodoRow(
+        it,
+        onDoneClick = { isDone -> onDoneClick(it.id, isDone) }
+      )
+    }
+  }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
 private fun TodoRow(
   item: TodoItem,
-  onDoneClick: (TodoItem) -> Unit = {},
+  onDoneClick: (Boolean) -> Unit,
 ) {
+  val haptic = LocalHapticFeedback.current
   Card(
-    Modifier.fillMaxWidth(),
+    Modifier
+      .fillMaxWidth()
+      .combinedClickable(onClick = {}, onLongClick = {
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+      }),
     colors = CardDefaults.cardColors(
       containerColor = if (item.isDone) MyColors.DoneCard else MyColors.UndoneCard,
-    )
-  ) {
+    ),
+
+    ) {
     Row(
       Modifier
         .fillMaxSize()
@@ -150,7 +167,7 @@ private fun TodoRow(
         item.isDone,
         colors = CheckboxDefaults.colors(checkedColor = MyColors.UndoneCard),
         modifier = Modifier.scale(1.5f),
-        onCheckedChange = { }
+        onCheckedChange = onDoneClick
       )
       Spacer(Modifier.width(5.dp))
       Text(item.text, fontSize = 18.sp, modifier =

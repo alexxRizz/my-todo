@@ -1,4 +1,4 @@
-package alexx.rizz.mytodo.feature.todolist
+package alexx.rizz.mytodo.feature.todolist.ui
 
 import alexx.rizz.mytodo.ui.theme.*
 import androidx.compose.foundation.layout.*

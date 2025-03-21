@@ -7,7 +7,10 @@ import kotlinx.coroutines.flow.*
 interface TodoDao {
 
   @Upsert
-  suspend fun insert(e: TodoEntity)
+  suspend fun upsert(e: TodoEntity)
+
+  @Query("UPDATE todos SET isDone=:isDone WHERE id=:todoId")
+  suspend fun done(todoId: Int, isDone: Boolean)
 
   @Query("SELECT COUNT(1) FROM todos")
   suspend fun count(): Int
