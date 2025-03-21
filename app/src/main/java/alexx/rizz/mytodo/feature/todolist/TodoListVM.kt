@@ -15,11 +15,11 @@ class TodoListVM @Inject constructor(
 ) : ViewModeBase() {
 
   sealed interface UserIntent {
-    data object AddCategory : UserIntent
-    data object AddTodo : UserIntent
-    data object CancelAdding : UserIntent
-    data class ConfirmAdding(val todoText: String) : UserIntent
-    data class Done(val todoId: Int, val isDone: Boolean) : UserIntent
+    data class EditCategory(val id: Int) : UserIntent
+    data class EditTodo(val id: Int) : UserIntent
+    data object CancelEditing : UserIntent
+    data class ConfirmEditing(val id: Int, val text: String) : UserIntent
+    data class Done(val id: Int, val isDone: Boolean) : UserIntent
   }
 
   private val mEditDialogState = MutableStateFlow<TodoEditDialogState?>(null)
@@ -44,35 +44,53 @@ class TodoListVM @Inject constructor(
 
     suspend fun handle(intent: UserIntent) {
       when (intent) {
-        UserIntent.AddCategory -> onAddCategory()
-        UserIntent.AddTodo -> onAddTodo()
-        UserIntent.CancelAdding -> onAddingCancelled()
-        is UserIntent.ConfirmAdding -> onAddingConfirmed(intent)
-        is UserIntent.Done -> onToggleTodo(intent)
+        is UserIntent.EditCategory -> onEditCategory(intent)
+        is UserIntent.EditTodo -> onEditTodo(intent)
+        is UserIntent.CancelEditing -> onCancelEditing()
+        is UserIntent.ConfirmEditing -> onConfirmEditing(intent)
+        is UserIntent.Done -> onDone(intent)
+        is UserIntent.EditTodo -> onEditTodo(intent)
       }
     }
 
-    private fun onAddCategory() {
-      showEditDialog(TodoEditDialogState.Category("Категория"))
+    private fun onEditCategory(intent: UserIntent.EditCategory) {
+      if (intent.id == 0) {
+        showEditDialog(TodoEditDialogState.Category(title = "Новая категория"))
+        return
+      }
+      // TODO
     }
 
-    private fun onAddTodo() {
-      showEditDialog(TodoEditDialogState.Item("Дело"))
+    private suspend fun onEditTodo(intent: UserIntent.EditTodo) {
+      if (intent.id == 0) {
+        showEditDialog(TodoEditDialogState.Item(title = "Новое дело"))
+        return
+      }
+      val todo = mTodoRep.getById(intent.id)
+        ?: return
+      showEditDialog(TodoEditDialogState.Item(
+        id = todo.id,
+        title = "Редактирование дела",
+        text = todo.text
+      ))
     }
 
-    private fun onAddingCancelled() {
+    private fun onCancelEditing() {
       hideEditDialog()
     }
 
-    private fun onAddingConfirmed(intent: UserIntent.ConfirmAdding) {
-      hideEditDialog()
+    private fun onConfirmEditing(intent: UserIntent.ConfirmEditing) {
       viewModelScope.launch {
-        mTodoRep.addTodo(TodoItem(intent.todoText, isDone = false))
+        if (intent.id == 0)
+          mTodoRep.addTodo(TodoItem(intent.text, isDone = false))
+        else
+          mTodoRep.updateTodo(intent.id, intent.text)
+        hideEditDialog()
       }
     }
 
-    private suspend fun onToggleTodo(intent: UserIntent.Done) {
-      mTodoRep.done(intent.todoId, intent.isDone)
+    private suspend fun onDone(intent: UserIntent.Done) {
+      mTodoRep.done(intent.id, intent.isDone)
     }
 
     private fun showEditDialog(state: TodoEditDialogState) {

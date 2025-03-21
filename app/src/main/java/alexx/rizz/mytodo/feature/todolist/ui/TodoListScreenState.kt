@@ -14,15 +14,18 @@ sealed interface TodoListScreenState {
 
 sealed interface TodoEditDialogState {
 
+  val id: Int
   val title: String
   val text: String
 
   data class Item(
+    override val id: Int = 0,
     override val title: String = "",
     override val text: String = "",
   ) : TodoEditDialogState
 
   data class Category(
+    override val id: Int = 0,
     override val title: String = "",
     override val text: String = "",
   ) : TodoEditDialogState

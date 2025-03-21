@@ -4,7 +4,6 @@ import alexx.rizz.mytodo.feature.todolist.*
 import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
 import alexx.rizz.mytodo.ui.*
 import alexx.rizz.mytodo.ui.theme.*
-import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.*
@@ -16,8 +15,6 @@ import androidx.compose.ui.*
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.geometry.*
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.hapticfeedback.*
-import androidx.compose.ui.platform.*
 import androidx.compose.ui.text.style.*
 import androidx.compose.ui.tooling.preview.*
 import androidx.compose.ui.unit.*
@@ -76,17 +73,22 @@ private fun TodoListLoadedSuccessfully(
     .fillMaxSize()
     .padding(10.dp)
   ) {
-    TodoList(Modifier.weight(1f), screenState.items, onDoneClick = { index, isDone -> onUserIntent(UserIntent.Done(index, isDone)) })
+    TodoList(
+      Modifier.weight(1f),
+      screenState.items,
+      onItemDoneClick = { todoId, isDone -> onUserIntent(UserIntent.Done(todoId, isDone)) },
+      onItemClick = { todoId -> onUserIntent(UserIntent.EditTodo(todoId)) }
+    )
     BottomActions(
-      { onUserIntent(UserIntent.AddCategory) },
-      { onUserIntent(UserIntent.AddTodo) },
+      onAddCategory = { onUserIntent(UserIntent.EditCategory(id = 0)) },
+      onAddTodo = { onUserIntent(UserIntent.EditTodo(id = 0)) },
     )
     if (screenState.editDialog != null)
       TodoItemEditDialog(
         title = screenState.editDialog.title,
         text = screenState.editDialog.text,
-        onCancel = { onUserIntent(UserIntent.CancelAdding) },
-        onOk = { onUserIntent(UserIntent.ConfirmAdding(it)) },
+        onCancel = { onUserIntent(UserIntent.CancelEditing) },
+        onOk = { onUserIntent(UserIntent.ConfirmEditing(screenState.editDialog.id, it)) },
       )
   }
 }
@@ -95,12 +97,13 @@ private fun TodoListLoadedSuccessfully(
 private fun TodoList(
   modifier: Modifier,
   items: List<TodoItem>,
-  onDoneClick: (Int, Boolean) -> Unit,
+  onItemDoneClick: (Int, Boolean) -> Unit,
+  onItemClick: (Int) -> Unit,
 ) {
   if (items.isEmpty())
     TodoListEmpty(modifier)
   else
-    TodoListWithItems(modifier, items, onDoneClick)
+    TodoListWithItems(modifier, items, onItemDoneClick, onItemClick)
 }
 
 @Composable
@@ -122,7 +125,8 @@ private fun TodoListEmpty(modifier: Modifier) {
 private fun TodoListWithItems(
   modifier: Modifier,
   items: List<TodoItem>,
-  onDoneClick: (Int, Boolean) -> Unit,
+  onItemDoneClick: (Int, Boolean) -> Unit,
+  onItemClick: (Int) -> Unit,
 ) {
   val todoListState = rememberLazyListState()
   LazyColumn(
@@ -133,43 +137,43 @@ private fun TodoListWithItems(
     items(items, key = { it.id }) {
       TodoRow(
         it,
-        onDoneClick = { isDone -> onDoneClick(it.id, isDone) }
+        onDoneClick = { isDone -> onItemDoneClick(it.id, isDone) },
+        onClick = { onItemClick(it.id) },
       )
     }
   }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun TodoRow(
   item: TodoItem,
   onDoneClick: (Boolean) -> Unit,
+  onClick: () -> Unit,
 ) {
-  val haptic = LocalHapticFeedback.current
   Card(
-    Modifier
-      .fillMaxWidth()
-      .combinedClickable(onClick = {}, onLongClick = {
-        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-      }),
+    modifier = Modifier.fillMaxWidth(),
+    shape = RoundedCornerShape(5.dp),
     colors = CardDefaults.cardColors(
       containerColor = if (item.isDone) MyColors.DoneCard else MyColors.UndoneCard,
     ),
-
-    ) {
+    onClick = onClick
+  ) {
     Row(
       Modifier
-        .fillMaxSize()
-        .padding(3.dp),
+        .padding(10.dp, 5.dp, 7.dp, 5.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      Checkbox(
-        item.isDone,
-        colors = CheckboxDefaults.colors(checkedColor = MyColors.UndoneCard),
-        modifier = Modifier.scale(1.5f),
-        onCheckedChange = onDoneClick
-      )
-      Spacer(Modifier.width(5.dp))
+      CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 20.dp) {
+        Checkbox(
+          item.isDone,
+          colors = CheckboxDefaults.colors(checkedColor = MyColors.UndoneCard),
+          modifier = Modifier
+            .scale(1.5f)
+            .padding(vertical = 5.dp),
+          onCheckedChange = onDoneClick,
+        )
+      }
+      Spacer(Modifier.width(10.dp))
       Text(item.text, fontSize = 18.sp, modifier =
         Modifier
           .conditional(item.isDone, {
@@ -181,6 +185,8 @@ private fun TodoRow(
             }
           })
       )
+      // Spacer(Modifier.weight(1f))
+      // TodoItemContextMenu()
     }
   }
 }

@@ -12,8 +12,8 @@ private val LightColorScheme = lightColorScheme(
   tertiary = MyColors.Tertiary,
   background = MyColors.Background,
   surface = MyColors.Background,
+  surfaceTint = MyColors.Background,
   // surfaceDim = MyColors.Background,
-  // surfaceTint = MyColors.Background,
   // surfaceBright = MyColors.Background,
   // surfaceVariant = MyColors.Background,
 )
