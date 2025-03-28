@@ -1,19 +1,19 @@
 package alexx.rizz.mytodo.feature.todolist
 
-import alexx.rizz.mytodo.app.logging.getLogger
+import alexx.rizz.mytodo.app.logging.*
 import alexx.rizz.mytodo.db.*
 import androidx.room.*
 import kotlinx.coroutines.flow.*
 import javax.inject.*
 
 interface ITodoRepository {
-  fun getAllItems(listOwnerId: TodoListId): Flow<List<TodoItem>>
+  fun observeItems(listOwnerId: TodoListId): Flow<List<TodoItem>>
   suspend fun getItemById(id: TodoItemId): TodoItem?
   suspend fun addItem(item: TodoItem)
   suspend fun doneItem(id: TodoItemId, isDone: Boolean)
   suspend fun updateItem(id: TodoItemId, text: String)
 
-  fun getAllLists(): Flow<List<TodoList>>
+  fun observeLists(): Flow<List<TodoList>>
   suspend fun addList(list: TodoList)
   suspend fun updateList(id: TodoListId, text: String)
 }
@@ -28,8 +28,8 @@ class TodoRepository @Inject constructor(
   private val mItemDao get() = db.todoItem()
   private val mListDao get() = db.todoList()
 
-  override fun getAllItems(listOwnerId: TodoListId): Flow<List<TodoItem>> =
-    mItemDao.byListOwnerId(listOwnerId).map { entities -> entities.map { it.toDomain() } }
+  override fun observeItems(listOwnerId: TodoListId): Flow<List<TodoItem>> =
+    mItemDao.observeByListOwnerId(listOwnerId).map { entities -> entities.map { it.toDomain() } }
 
   override suspend fun getItemById(id: TodoItemId): TodoItem? =
     mItemDao.byId(id)?.toDomain()
@@ -50,8 +50,8 @@ class TodoRepository @Inject constructor(
     mItemDao.updateTodo(id, text)
   }
 
-  override fun getAllLists(): Flow<List<TodoList>> =
-    mListDao.all().map { entities -> entities.map { it.toDomain() } }
+  override fun observeLists(): Flow<List<TodoList>> =
+    mListDao.observeAll().map { entities -> entities.map { it.toDomain() } }
 
   override suspend fun addList(list: TodoList) {
     db.withTransaction {

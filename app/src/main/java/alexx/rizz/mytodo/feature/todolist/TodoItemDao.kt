@@ -19,7 +19,7 @@ interface TodoItemDao {
   suspend fun count(): Int
 
   @Query("SELECT * FROM todoItems WHERE listOwnerId=:listOwnerId ORDER BY orderNumber")
-  fun byListOwnerId(listOwnerId: TodoListId): Flow<List<TodoItemEntity>>
+  fun observeByListOwnerId(listOwnerId: TodoListId): Flow<List<TodoItemEntity>>
 
   @Query("SELECT * FROM todoItems WHERE id=:id")
   suspend fun byId(id: TodoItemId): TodoItemEntity?

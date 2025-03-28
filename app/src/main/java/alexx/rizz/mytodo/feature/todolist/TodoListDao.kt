@@ -16,7 +16,7 @@ interface TodoListDao {
   suspend fun count(): Int
 
   @Query("SELECT * FROM todoLists ORDER BY orderNumber")
-  fun all(): Flow<List<TodoListEntity>>
+  fun observeAll(): Flow<List<TodoListEntity>>
 
   @Query("SELECT * FROM todoLists WHERE id=:id")
   suspend fun byId(id: Int): TodoListEntity?

@@ -15,6 +15,8 @@ class TodoListVM @Inject constructor(
 ) : ViewModeBase() {
 
   sealed interface UserIntent {
+    data class ShowListItems(val listOwnerId: TodoListId) : UserIntent
+    data object Back : UserIntent
     data class EditList(val id: TodoListId) : UserIntent
     data class EditItem(val id: TodoItemId) : UserIntent
     data object CancelEditing : UserIntent
@@ -27,15 +29,19 @@ class TodoListVM @Inject constructor(
   private val mListOwnerId = MutableStateFlow<TodoListId>(TodoListId.Unknown)
 
   val screenState = combine(
-    mTodoRep.getAllLists(),
-    mTodoRep.getAllItems(mListOwnerId.value),
+    mTodoRep.observeLists(),
+    mTodoRep.observeItems(mListOwnerId.value),
     mListOwnerId,
-    mEditDialogState
+    mEditDialogState,
   ) { allLists, allItems, listOwnerId, editDialogState ->
+    val listOwnerName = if (listOwnerId == TodoListId.Unknown)
+      null
+    else
+      allLists.first { it.id == listOwnerId }.text
     TodoListScreenState.LoadedSuccessfully(
       lists = allLists,
       items = allItems,
-      listOwnerName = if (listOwnerId == TodoListId.Unknown) null else allLists.first { it.id == listOwnerId }.text,
+      listOwnerName = listOwnerName,
       editDialog = editDialogState
     )
   }.stateIn(
@@ -53,6 +59,8 @@ class TodoListVM @Inject constructor(
 
     suspend fun handle(intent: UserIntent) {
       when (intent) {
+        UserIntent.Back -> onBack()
+        is UserIntent.ShowListItems -> onShowListItems(intent)
         is UserIntent.EditList -> onEditList(intent)
         is UserIntent.EditItem -> onEditItem(intent)
         is UserIntent.CancelEditing -> onCancelEditing()
@@ -60,6 +68,14 @@ class TodoListVM @Inject constructor(
         is UserIntent.ConfirmItemEditing -> onConfirmItemEditing(intent)
         is UserIntent.Done -> onDone(intent)
       }
+    }
+
+    private fun onBack() {
+      mListOwnerId.value = TodoListId.Unknown
+    }
+
+    private fun onShowListItems(intent: UserIntent.ShowListItems) {
+      mListOwnerId.value = intent.listOwnerId
     }
 
     private fun onEditList(intent: UserIntent.EditList) {

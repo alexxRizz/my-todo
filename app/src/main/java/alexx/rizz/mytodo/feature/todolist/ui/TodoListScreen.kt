@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.*
 import androidx.compose.material.icons.*
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -24,9 +24,17 @@ import androidx.lifecycle.compose.*
 @Composable
 fun TodoListScreen(vm: TodoListVM = hiltViewModel()) {
   val screenState by vm.screenState.collectAsStateWithLifecycle()
+  val loadedState = screenState as? TodoListScreenState.LoadedSuccessfully
   Scaffold(
     modifier = Modifier.fillMaxSize(),
-    floatingActionButton = { MyFloatingActionButton(screenState, vm::onUserIntent) }
+    topBar = {
+      if (loadedState?.listOwnerName != null)
+        TodoListTopBar(loadedState.listOwnerName, { vm.onUserIntent(UserIntent.Back) })
+    },
+    floatingActionButton = {
+      if (loadedState != null)
+        TodoListFloatingActionButton(loadedState, vm::onUserIntent)
+    }
   ) { innerPadding ->
     TodoListScreenContent(
       Modifier.padding(innerPadding),
@@ -36,29 +44,24 @@ fun TodoListScreen(vm: TodoListVM = hiltViewModel()) {
   }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MyFloatingActionButton(
-  screenState: TodoListScreenState,
-  onUserIntent: (UserIntent) -> Unit,
+fun TodoListTopBar(
+  title: String,
+  onBack: () -> Unit,
 ) {
-  when (screenState) {
-    TodoListScreenState.Loading -> return
-    is TodoListScreenState.LoadedSuccessfully -> {
-      FloatingActionButton(
-        modifier = Modifier.offset(y = (-10).dp),
-        containerColor = MyColors.Primary,
-        onClick = {
-          val intent = if (screenState.listOwnerName == null)
-            UserIntent.EditList(id = TodoListId.Unknown)
-          else
-            UserIntent.EditItem(id = TodoItemId.Unknown)
-          onUserIntent(intent)
-        }
-      ) {
-        Icon(Icons.Filled.Add, null)
-      }
-    }
-  }
+  TopAppBar(
+    modifier = Modifier.heightIn(max = 65.dp),
+    navigationIcon = {
+      IconButton(onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
+    },
+    title = { Text(title) },
+    colors = TopAppBarDefaults.topAppBarColors(
+      containerColor = MyColors.Primary,
+      titleContentColor = Color.White,
+      navigationIconContentColor = Color.White,
+    ),
+  )
 }
 
 @Composable
@@ -105,7 +108,7 @@ private fun TodoListLoadedSuccessfully(
       screenState.lists,
       screenState.items,
       screenState.listOwnerName == null,
-      onListClick = { id -> onUserIntent(UserIntent.EditList(id)) },
+      onListClick = { id -> onUserIntent(UserIntent.ShowListItems(id)) },
       onItemClick = { id -> onUserIntent(UserIntent.EditItem(id)) },
       onItemDoneClick = { id, isDone -> onUserIntent(UserIntent.Done(id, isDone)) },
     )
@@ -141,8 +144,8 @@ private fun TodoList(
   onItemClick: (TodoItemId) -> Unit,
   onItemDoneClick: (TodoItemId, Boolean) -> Unit,
 ) {
-  if (lists.isEmpty() && items.isEmpty())
-    TodoListEmpty(modifier)
+  if ((useListsOrItems && lists.isEmpty()) || (!useListsOrItems && items.isEmpty()))
+    TodoListEmpty(modifier, useListsOrItems)
   else if (useListsOrItems)
     TodoLists(modifier, lists, onListClick)
   else
@@ -150,13 +153,13 @@ private fun TodoList(
 }
 
 @Composable
-private fun TodoListEmpty(modifier: Modifier) {
+private fun TodoListEmpty(modifier: Modifier, useListsOrItems: Boolean) {
   Box(
     modifier = modifier.fillMaxSize(),
     contentAlignment = Alignment.Center,
   ) {
     Text(
-      "Добавьте список",
+      if (useListsOrItems) "Добавьте список" else "Добавьте пункт",
       textAlign = TextAlign.Center,
       color = MyColors.Tertiary,
       fontSize = 25.sp,
@@ -184,7 +187,6 @@ private fun TodoLists(
     }
   }
 }
-
 
 @Composable
 private fun TodoItems(
