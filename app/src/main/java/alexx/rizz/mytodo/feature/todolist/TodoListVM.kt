@@ -30,7 +30,7 @@ class TodoListVM @Inject constructor(
 
   val screenState = combine(
     mTodoRep.observeLists(),
-    mTodoRep.observeItems(mListOwnerId.value),
+    mListOwnerId.mapToItems(),
     mListOwnerId,
     mEditDialogState,
   ) { allLists, allItems, listOwnerId, editDialogState ->
@@ -49,6 +49,14 @@ class TodoListVM @Inject constructor(
     SharingStarted.WhileSubscribed(5.seconds),
     initialValue = TodoListScreenState.Loading
   )
+
+  private fun MutableStateFlow<TodoListId>.mapToItems(): Flow<List<TodoItem>> =
+    flatMapLatest {
+      if (it == TodoListId.Unknown)
+        flowOf(emptyList())
+      else
+        mTodoRep.observeItems(this.value)
+    }
 
   fun onUserIntent(intent: UserIntent) =
     viewModelScope.launch {
