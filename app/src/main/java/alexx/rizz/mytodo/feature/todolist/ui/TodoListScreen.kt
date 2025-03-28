@@ -18,20 +18,47 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.style.*
 import androidx.compose.ui.tooling.preview.*
 import androidx.compose.ui.unit.*
+import androidx.hilt.navigation.compose.*
 import androidx.lifecycle.compose.*
-import androidx.lifecycle.viewmodel.compose.*
 
 @Composable
-fun TodoListScreen(
-  modifier: Modifier,
-  vm: TodoListVM = viewModel()
-) {
+fun TodoListScreen(vm: TodoListVM = hiltViewModel()) {
   val screenState by vm.screenState.collectAsStateWithLifecycle()
-  TodoListScreenContent(
-    modifier,
-    screenState,
-    vm::onUserIntent,
-  )
+  Scaffold(
+    modifier = Modifier.fillMaxSize(),
+    floatingActionButton = { MyFloatingActionButton(screenState, vm::onUserIntent) }
+  ) { innerPadding ->
+    TodoListScreenContent(
+      Modifier.padding(innerPadding),
+      screenState,
+      vm::onUserIntent,
+    )
+  }
+}
+
+@Composable
+private fun MyFloatingActionButton(
+  screenState: TodoListScreenState,
+  onUserIntent: (UserIntent) -> Unit,
+) {
+  when (screenState) {
+    TodoListScreenState.Loading -> return
+    is TodoListScreenState.LoadedSuccessfully -> {
+      FloatingActionButton(
+        modifier = Modifier.offset(y = (-10).dp),
+        containerColor = MyColors.Primary,
+        onClick = {
+          val intent = if (screenState.listOwnerName == null)
+            UserIntent.EditList(id = TodoListId.Unknown)
+          else
+            UserIntent.EditItem(id = TodoItemId.Unknown)
+          onUserIntent(intent)
+        }
+      ) {
+        Icon(Icons.Filled.Add, null)
+      }
+    }
+  }
 }
 
 @Composable
@@ -75,35 +102,51 @@ private fun TodoListLoadedSuccessfully(
   ) {
     TodoList(
       Modifier.weight(1f),
+      screenState.lists,
       screenState.items,
-      onItemDoneClick = { todoId, isDone -> onUserIntent(UserIntent.Done(todoId, isDone)) },
-      onItemClick = { todoId -> onUserIntent(UserIntent.EditTodo(todoId)) }
+      screenState.listOwnerName == null,
+      onListClick = { id -> onUserIntent(UserIntent.EditList(id)) },
+      onItemClick = { id -> onUserIntent(UserIntent.EditItem(id)) },
+      onItemDoneClick = { id, isDone -> onUserIntent(UserIntent.Done(id, isDone)) },
     )
-    BottomActions(
-      onAddCategory = { onUserIntent(UserIntent.EditCategory(id = 0)) },
-      onAddTodo = { onUserIntent(UserIntent.EditTodo(id = 0)) },
-    )
-    if (screenState.editDialog != null)
-      TodoItemEditDialog(
-        title = screenState.editDialog.title,
-        text = screenState.editDialog.text,
-        onCancel = { onUserIntent(UserIntent.CancelEditing) },
-        onOk = { onUserIntent(UserIntent.ConfirmEditing(screenState.editDialog.id, it)) },
-      )
+    when (screenState.editDialog) {
+      null -> Unit
+      is TodoEditDialogState.List ->
+        TodoItemEditDialog(
+          title = screenState.editDialog.title,
+          text = screenState.editDialog.text,
+          onCancel = { onUserIntent(UserIntent.CancelEditing) },
+          onOk = { onUserIntent(UserIntent.ConfirmListEditing(screenState.editDialog.id, it)) },
+        )
+
+      is TodoEditDialogState.Item ->
+        TodoItemEditDialog(
+          title = screenState.editDialog.title,
+          text = screenState.editDialog.text,
+          onCancel = { onUserIntent(UserIntent.CancelEditing) },
+          onOk = { onUserIntent(UserIntent.ConfirmItemEditing(screenState.editDialog.id, it)) },
+        )
+    }
+
   }
 }
 
 @Composable
 private fun TodoList(
   modifier: Modifier,
+  lists: List<TodoList>,
   items: List<TodoItem>,
-  onItemDoneClick: (Int, Boolean) -> Unit,
-  onItemClick: (Int) -> Unit,
+  useListsOrItems: Boolean,
+  onListClick: (TodoListId) -> Unit,
+  onItemClick: (TodoItemId) -> Unit,
+  onItemDoneClick: (TodoItemId, Boolean) -> Unit,
 ) {
-  if (items.isEmpty())
+  if (lists.isEmpty() && items.isEmpty())
     TodoListEmpty(modifier)
+  else if (useListsOrItems)
+    TodoLists(modifier, lists, onListClick)
   else
-    TodoListWithItems(modifier, items, onItemDoneClick, onItemClick)
+    TodoItems(modifier, items, onItemClick, onItemDoneClick)
 }
 
 @Composable
@@ -113,7 +156,7 @@ private fun TodoListEmpty(modifier: Modifier) {
     contentAlignment = Alignment.Center,
   ) {
     Text(
-      "Добавьте категорию\nили дело",
+      "Добавьте список",
       textAlign = TextAlign.Center,
       color = MyColors.Tertiary,
       fontSize = 25.sp,
@@ -122,11 +165,33 @@ private fun TodoListEmpty(modifier: Modifier) {
 }
 
 @Composable
-private fun TodoListWithItems(
+private fun TodoLists(
+  modifier: Modifier,
+  lists: List<TodoList>,
+  onListClick: (TodoListId) -> Unit,
+) {
+  val todoListState = rememberLazyListState()
+  LazyColumn(
+    modifier,
+    state = todoListState,
+    verticalArrangement = Arrangement.spacedBy(0.dp)
+  ) {
+    items(lists, key = { it.id.asInt }) {
+      ListRow(
+        it,
+        onClick = { onListClick(it.id) },
+      )
+    }
+  }
+}
+
+
+@Composable
+private fun TodoItems(
   modifier: Modifier,
   items: List<TodoItem>,
-  onItemDoneClick: (Int, Boolean) -> Unit,
-  onItemClick: (Int) -> Unit,
+  onItemClick: (TodoItemId) -> Unit,
+  onItemDoneClick: (TodoItemId, Boolean) -> Unit,
 ) {
   val todoListState = rememberLazyListState()
   LazyColumn(
@@ -134,8 +199,9 @@ private fun TodoListWithItems(
     state = todoListState,
     verticalArrangement = Arrangement.spacedBy(7.dp)
   ) {
-    items(items, key = { it.id }) {
-      TodoRow(
+
+    items(items, key = { it.id.asInt }) {
+      ItemRow(
         it,
         onDoneClick = { isDone -> onItemDoneClick(it.id, isDone) },
         onClick = { onItemClick(it.id) },
@@ -145,7 +211,28 @@ private fun TodoListWithItems(
 }
 
 @Composable
-private fun TodoRow(
+private fun ListRow(
+  list: TodoList,
+  onClick: () -> Unit,
+) {
+  Card(
+    modifier = Modifier.fillMaxWidth(),
+    shape = RoundedCornerShape(5.dp),
+    colors = CardDefaults.cardColors(containerColor = MyColors.UndoneCard),
+    onClick = onClick
+  ) {
+    Row(
+      Modifier
+        .padding(10.dp, 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Text(list.text, fontSize = 18.sp)
+    }
+  }
+}
+
+@Composable
+private fun ItemRow(
   item: TodoItem,
   onDoneClick: (Boolean) -> Unit,
   onClick: () -> Unit,
@@ -191,50 +278,15 @@ private fun TodoRow(
   }
 }
 
-@Composable
-private fun BottomActions(
-  onAddCategory: () -> Unit,
-  onAddTodo: () -> Unit,
-) {
-  Row(
-    Modifier
-      .fillMaxWidth()
-      .padding(top = 3.dp),
-    horizontalArrangement = Arrangement.spacedBy(15.dp),
-  ) {
-    Button(
-      onClick = onAddCategory,
-      modifier = Modifier.weight(1f),
-      shape = RoundedCornerShape(10.dp),
-      contentPadding = ButtonDefaults.ContentPadding.copy(top = 10.dp, bottom = 10.dp),
-      colors = ButtonDefaults.buttonColors(containerColor = MyColors.Tertiary),
-    ) {
-      Icon(Icons.Default.Add, contentDescription = null)
-      Spacer(Modifier.width(10.dp))
-      Text("Категория", fontSize = 18.sp)
-    }
-    Button(
-      onClick = onAddTodo,
-      modifier = Modifier.weight(1f),
-      shape = RoundedCornerShape(10.dp),
-      contentPadding = ButtonDefaults.ContentPadding.copy(top = 10.dp, bottom = 10.dp),
-    ) {
-      Icon(Icons.Default.Add, contentDescription = null)
-      Spacer(Modifier.width(10.dp))
-      Text("Дело", fontSize = 18.sp)
-    }
-  }
-}
-
 private class TodoListScreenPreviewParameterProvider : PreviewParameterProvider<TodoListScreenState> {
   override val values = sequenceOf(
     TodoListScreenState.Loading,
     TodoListScreenState.LoadedSuccessfully(emptyList()),
     TodoListScreenState.LoadedSuccessfully(
-      List(20) {
+      items = List(20) {
         val i = it + 1
         val text = if (i % 3 == 0) "Lorem Ipsum is simply dummy text of the printing and typesetting industry." else "Todo $i"
-        TodoItem(text, isDone = i % 2 == 0, i)
+        TodoItem(text, isDone = i % 2 == 0, TodoListId(i), TodoItemId(i))
       }
     )
   )
@@ -245,7 +297,7 @@ private class TodoListScreenPreviewParameterProvider : PreviewParameterProvider<
 private fun TodoListScreenPreview(
   @PreviewParameter(TodoListScreenPreviewParameterProvider::class) screenState: TodoListScreenState
 ) {
-  MyToDoTheme {
+  MyTodoTheme {
     TodoListScreenContent(
       Modifier.safeDrawingPadding(),
       screenState,

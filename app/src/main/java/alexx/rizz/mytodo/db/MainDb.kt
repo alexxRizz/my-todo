@@ -5,12 +5,14 @@ import androidx.room.*
 
 @Database(
   entities = [
-    TodoEntity::class,
+    TodoItemEntity::class,
+    TodoListEntity::class,
   ],
   exportSchema = true,
   version = MainDbVersion,
 )
 abstract class MainDb : RoomDatabase() {
 
-  abstract fun todo(): TodoDao
+  abstract fun todoItem(): TodoItemDao
+  abstract fun todoList(): TodoListDao
 }

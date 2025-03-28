@@ -108,7 +108,7 @@ private fun DialogButtons(inputState: MutableState<String>, onCancel: () -> Unit
 @Composable
 @Preview(showBackground = true, showSystemUi = true)
 private fun TodoItemEditDialogPreview() {
-  MyToDoTheme {
+  MyTodoTheme {
     Box(
       contentAlignment = Alignment.Center,
       modifier = Modifier.fillMaxSize(),

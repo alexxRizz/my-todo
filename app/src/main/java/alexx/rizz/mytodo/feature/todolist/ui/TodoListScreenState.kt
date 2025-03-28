@@ -7,26 +7,24 @@ sealed interface TodoListScreenState {
   object Loading : TodoListScreenState
 
   data class LoadedSuccessfully(
+    val lists: List<TodoList> = emptyList(),
     val items: List<TodoItem> = emptyList(),
+    val listOwnerName: String? = null,
     val editDialog: TodoEditDialogState? = null,
   ) : TodoListScreenState
 }
 
 sealed interface TodoEditDialogState {
 
-  val id: Int
-  val title: String
-  val text: String
-
   data class Item(
-    override val id: Int = 0,
-    override val title: String = "",
-    override val text: String = "",
+    val id: TodoItemId = TodoItemId.Unknown,
+    val title: String = "",
+    val text: String = "",
   ) : TodoEditDialogState
 
-  data class Category(
-    override val id: Int = 0,
-    override val title: String = "",
-    override val text: String = "",
+  data class List(
+    val id: TodoListId = TodoListId.Unknown,
+    val title: String = "",
+    val text: String = "",
   ) : TodoEditDialogState
 }

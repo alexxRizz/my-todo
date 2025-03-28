@@ -15,18 +15,27 @@ class TodoListVM @Inject constructor(
 ) : ViewModeBase() {
 
   sealed interface UserIntent {
-    data class EditCategory(val id: Int) : UserIntent
-    data class EditTodo(val id: Int) : UserIntent
+    data class EditList(val id: TodoListId) : UserIntent
+    data class EditItem(val id: TodoItemId) : UserIntent
     data object CancelEditing : UserIntent
-    data class ConfirmEditing(val id: Int, val text: String) : UserIntent
-    data class Done(val id: Int, val isDone: Boolean) : UserIntent
+    data class ConfirmListEditing(val id: TodoListId, val text: String) : UserIntent
+    data class ConfirmItemEditing(val id: TodoItemId, val text: String) : UserIntent
+    data class Done(val id: TodoItemId, val isDone: Boolean) : UserIntent
   }
 
   private val mEditDialogState = MutableStateFlow<TodoEditDialogState?>(null)
+  private val mListOwnerId = MutableStateFlow<TodoListId>(TodoListId.Unknown)
 
-  val screenState = combine(mTodoRep.getAll(), mEditDialogState) { allItems, editDialogState ->
+  val screenState = combine(
+    mTodoRep.getAllLists(),
+    mTodoRep.getAllItems(mListOwnerId.value),
+    mListOwnerId,
+    mEditDialogState
+  ) { allLists, allItems, listOwnerId, editDialogState ->
     TodoListScreenState.LoadedSuccessfully(
+      lists = allLists,
       items = allItems,
+      listOwnerName = if (listOwnerId == TodoListId.Unknown) null else allLists.first { it.id == listOwnerId }.text,
       editDialog = editDialogState
     )
   }.stateIn(
@@ -44,33 +53,33 @@ class TodoListVM @Inject constructor(
 
     suspend fun handle(intent: UserIntent) {
       when (intent) {
-        is UserIntent.EditCategory -> onEditCategory(intent)
-        is UserIntent.EditTodo -> onEditTodo(intent)
+        is UserIntent.EditList -> onEditList(intent)
+        is UserIntent.EditItem -> onEditItem(intent)
         is UserIntent.CancelEditing -> onCancelEditing()
-        is UserIntent.ConfirmEditing -> onConfirmEditing(intent)
+        is UserIntent.ConfirmListEditing -> onConfirmListEditing(intent)
+        is UserIntent.ConfirmItemEditing -> onConfirmItemEditing(intent)
         is UserIntent.Done -> onDone(intent)
-        is UserIntent.EditTodo -> onEditTodo(intent)
       }
     }
 
-    private fun onEditCategory(intent: UserIntent.EditCategory) {
-      if (intent.id == 0) {
-        showEditDialog(TodoEditDialogState.Category(title = "Новая категория"))
+    private fun onEditList(intent: UserIntent.EditList) {
+      if (intent.id == TodoListId.Unknown) {
+        showEditDialog(TodoEditDialogState.List(title = "Новый список"))
         return
       }
       // TODO
     }
 
-    private suspend fun onEditTodo(intent: UserIntent.EditTodo) {
-      if (intent.id == 0) {
-        showEditDialog(TodoEditDialogState.Item(title = "Новое дело"))
+    private suspend fun onEditItem(intent: UserIntent.EditItem) {
+      if (intent.id == TodoItemId.Unknown) {
+        showEditDialog(TodoEditDialogState.Item(title = "Новый пункт"))
         return
       }
-      val todo = mTodoRep.getById(intent.id)
+      val todo = mTodoRep.getItemById(intent.id)
         ?: return
       showEditDialog(TodoEditDialogState.Item(
         id = todo.id,
-        title = "Редактирование дела",
+        title = "Редактирование пункта",
         text = todo.text
       ))
     }
@@ -79,18 +88,28 @@ class TodoListVM @Inject constructor(
       hideEditDialog()
     }
 
-    private fun onConfirmEditing(intent: UserIntent.ConfirmEditing) {
+    private fun onConfirmListEditing(intent: UserIntent.ConfirmListEditing) {
       viewModelScope.launch {
-        if (intent.id == 0)
-          mTodoRep.addTodo(TodoItem(intent.text, isDone = false))
+        if (intent.id == TodoListId.Unknown)
+          mTodoRep.addList(TodoList(intent.text))
         else
-          mTodoRep.updateTodo(intent.id, intent.text)
+          mTodoRep.updateList(intent.id, intent.text)
+        hideEditDialog()
+      }
+    }
+
+    private fun onConfirmItemEditing(intent: UserIntent.ConfirmItemEditing) {
+      viewModelScope.launch {
+        if (intent.id == TodoItemId.Unknown)
+          mTodoRep.addItem(TodoItem(intent.text, isDone = false, listOwnerId = mListOwnerId.value))
+        else
+          mTodoRep.updateItem(intent.id, intent.text)
         hideEditDialog()
       }
     }
 
     private suspend fun onDone(intent: UserIntent.Done) {
-      mTodoRep.done(intent.id, intent.isDone)
+      mTodoRep.doneItem(intent.id, intent.isDone)
     }
 
     private fun showEditDialog(state: TodoEditDialogState) {

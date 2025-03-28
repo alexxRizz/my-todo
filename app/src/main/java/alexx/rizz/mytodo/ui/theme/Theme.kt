@@ -19,7 +19,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun MyToDoTheme(
+fun MyTodoTheme(
   darkTheme: Boolean = isSystemInDarkTheme(),
   content: @Composable () -> Unit
 ) {
