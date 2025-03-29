@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.*
 
 @Composable
 fun TodoListFloatingActionButton(
-  screenState: TodoListScreenState.LoadedSuccessfully,
+  screenState: TodoListScreenState.Success,
   onUserIntent: (UserIntent) -> Unit,
 ) {
   FloatingActionButton(

@@ -1,5 +1,6 @@
 package alexx.rizz.mytodo.feature.todolist
 
+import alexx.rizz.mytodo.app.utils.*
 import alexx.rizz.mytodo.feature.*
 import alexx.rizz.mytodo.feature.todolist.ui.*
 import androidx.lifecycle.*
@@ -28,35 +29,11 @@ class TodoListVM @Inject constructor(
   private val mEditDialogState = MutableStateFlow<TodoEditDialogState?>(null)
   private val mListOwnerId = MutableStateFlow<TodoListId>(TodoListId.Unknown)
 
-  val screenState = combine(
-    mTodoRep.observeLists(),
-    mListOwnerId.mapToItems(),
-    mListOwnerId,
-    mEditDialogState,
-  ) { allLists, allItems, listOwnerId, editDialogState ->
-    val listOwnerName = if (listOwnerId == TodoListId.Unknown)
-      null
-    else
-      allLists.first { it.id == listOwnerId }.text
-    TodoListScreenState.LoadedSuccessfully(
-      lists = allLists,
-      items = allItems,
-      listOwnerName = listOwnerName,
-      editDialog = editDialogState
-    )
-  }.stateIn(
+  val screenState = newScreenState().stateIn(
     viewModelScope,
     SharingStarted.WhileSubscribed(5.seconds),
     initialValue = TodoListScreenState.Loading
   )
-
-  private fun MutableStateFlow<TodoListId>.mapToItems(): Flow<List<TodoItem>> =
-    flatMapLatest {
-      if (it == TodoListId.Unknown)
-        flowOf(emptyList())
-      else
-        mTodoRep.observeItems(this.value)
-    }
 
   fun onUserIntent(intent: UserIntent) =
     viewModelScope.launch {
@@ -144,4 +121,38 @@ class TodoListVM @Inject constructor(
       mEditDialogState.value = null
     }
   }
+
+  private fun newScreenState(): Flow<TodoListScreenState> {
+    val listsFlow = mTodoRep.observeLists()
+    val itemsFlow = mListOwnerId.flatMapLatest { newListOwnerId ->
+      val items = if (newListOwnerId == TodoListId.Unknown)
+        flowOf(emptyList())
+      else
+        mTodoRep.observeItems(newListOwnerId)
+      items.asResult()
+    }
+    return combine(
+      listsFlow,
+      itemsFlow,
+      mListOwnerId,
+      mEditDialogState,
+    ) { lists, items, listOwnerId, editDialogState ->
+      val listOwnerName =
+        if (listOwnerId == TodoListId.Unknown)
+          null
+        else
+          lists.first { it.id == listOwnerId }.text
+      when (items) {
+        is Result.Loading -> TodoListScreenState.Loading
+        is Result.Success -> TodoListScreenState.Success(
+          lists = lists,
+          items = items.data,
+          listOwnerName = listOwnerName,
+          editDialog = editDialogState
+        )
+        is Result.Error -> TODO()
+      }
+    }
+  }
+
 }

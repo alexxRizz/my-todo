@@ -24,7 +24,7 @@ import androidx.lifecycle.compose.*
 @Composable
 fun TodoListScreen(vm: TodoListVM = hiltViewModel()) {
   val screenState by vm.screenState.collectAsStateWithLifecycle()
-  val loadedState = screenState as? TodoListScreenState.LoadedSuccessfully
+  val loadedState = screenState as? TodoListScreenState.Success
   Scaffold(
     modifier = Modifier.fillMaxSize(),
     topBar = {
@@ -72,7 +72,7 @@ private fun TodoListScreenContent(
 ) {
   when (screenState) {
     TodoListScreenState.Loading -> TodoListLoading(modifier)
-    is TodoListScreenState.LoadedSuccessfully -> TodoListLoadedSuccessfully(modifier, screenState, onUserIntent)
+    is TodoListScreenState.Success -> TodoListLoadedSuccessfully(modifier, screenState, onUserIntent)
   }
 }
 
@@ -96,7 +96,7 @@ private fun TodoListLoading(modifier: Modifier) {
 @Composable
 private fun TodoListLoadedSuccessfully(
   modifier: Modifier,
-  screenState: TodoListScreenState.LoadedSuccessfully,
+  screenState: TodoListScreenState.Success,
   onUserIntent: (UserIntent) -> Unit,
 ) {
   Column(modifier
@@ -283,8 +283,8 @@ private fun ItemRow(
 private class TodoListScreenPreviewParameterProvider : PreviewParameterProvider<TodoListScreenState> {
   override val values = sequenceOf(
     TodoListScreenState.Loading,
-    TodoListScreenState.LoadedSuccessfully(emptyList()),
-    TodoListScreenState.LoadedSuccessfully(
+    TodoListScreenState.Success(emptyList()),
+    TodoListScreenState.Success(
       items = List(20) {
         val i = it + 1
         val text = if (i % 3 == 0) "Lorem Ipsum is simply dummy text of the printing and typesetting industry." else "Todo $i"

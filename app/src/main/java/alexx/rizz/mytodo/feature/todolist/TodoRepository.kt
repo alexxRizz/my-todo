@@ -29,7 +29,9 @@ class TodoRepository @Inject constructor(
   private val mListDao get() = db.todoList()
 
   override fun observeItems(listOwnerId: TodoListId): Flow<List<TodoItem>> =
-    mItemDao.observeByListOwnerId(listOwnerId).map { entities -> entities.map { it.toDomain() } }
+    mItemDao
+      .observeByListOwnerId(listOwnerId)
+      .map { entities -> entities.map { it.toDomain() } }
 
   override suspend fun getItemById(id: TodoItemId): TodoItem? =
     mItemDao.byId(id)?.toDomain()
@@ -51,7 +53,9 @@ class TodoRepository @Inject constructor(
   }
 
   override fun observeLists(): Flow<List<TodoList>> =
-    mListDao.observeAll().map { entities -> entities.map { it.toDomain() } }
+    mListDao
+      .observeAll()
+      .map { entities -> entities.map { it.toDomain() } }
 
   override suspend fun addList(list: TodoList) {
     db.withTransaction {

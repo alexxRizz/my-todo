@@ -4,9 +4,10 @@ import alexx.rizz.mytodo.feature.todolist.*
 
 sealed interface TodoListScreenState {
 
-  object Loading : TodoListScreenState
+  data object Loading : TodoListScreenState
 
-  data class LoadedSuccessfully(
+  // TODO: разделить состояние на SuccessLists и SuccessItems ?
+  data class Success(
     val lists: List<TodoList> = emptyList(),
     val items: List<TodoItem> = emptyList(),
     val listOwnerName: String? = null,
