@@ -4,11 +4,10 @@ import alexx.rizz.mytodo.feature.todolist.*
 import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
 import alexx.rizz.mytodo.ui.*
 import alexx.rizz.mytodo.ui.theme.*
+import androidx.activity.compose.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.*
-import androidx.compose.material.icons.*
-import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -24,16 +23,23 @@ import androidx.lifecycle.compose.*
 @Composable
 fun TodoListScreen(vm: TodoListVM = hiltViewModel()) {
   val screenState by vm.screenState.collectAsStateWithLifecycle()
-  val loadedState = screenState as? TodoListScreenState.Success
+  val successState = screenState as? TodoListScreenState.Success
+  val isBackVisible = successState?.isBackVisible == true
+  BackHandler(enabled = isBackVisible) {
+    vm.onUserIntent(UserIntent.Back)
+  }
   Scaffold(
     modifier = Modifier.fillMaxSize(),
     topBar = {
-      if (loadedState?.listOwnerName != null)
-        TodoListTopBar(loadedState.listOwnerName, { vm.onUserIntent(UserIntent.Back) })
+      TodoListTopBar(
+        isBackVisible = isBackVisible,
+        title = successState?.title ?: "",
+        onBack = { vm.onUserIntent(UserIntent.Back) }
+      )
     },
     floatingActionButton = {
-      if (loadedState != null)
-        TodoListFloatingActionButton(loadedState, vm::onUserIntent)
+      if (successState != null)
+        TodoListFloatingActionButton(successState.isListsVisible, vm::onUserIntent)
     }
   ) { innerPadding ->
     TodoListScreenContent(
@@ -42,26 +48,6 @@ fun TodoListScreen(vm: TodoListVM = hiltViewModel()) {
       vm::onUserIntent,
     )
   }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TodoListTopBar(
-  title: String,
-  onBack: () -> Unit,
-) {
-  TopAppBar(
-    modifier = Modifier.heightIn(max = 65.dp),
-    navigationIcon = {
-      IconButton(onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
-    },
-    title = { Text(title) },
-    colors = TopAppBarDefaults.topAppBarColors(
-      containerColor = MyColors.Primary,
-      titleContentColor = Color.White,
-      navigationIconContentColor = Color.White,
-    ),
-  )
 }
 
 @Composable
@@ -107,7 +93,7 @@ private fun TodoListLoadedSuccessfully(
       Modifier.weight(1f),
       screenState.lists,
       screenState.items,
-      screenState.listOwnerName == null,
+      screenState.isListsVisible,
       onListClick = { id -> onUserIntent(UserIntent.ShowListItems(id)) },
       onItemClick = { id -> onUserIntent(UserIntent.EditItem(id)) },
       onItemDoneClick = { id, isDone -> onUserIntent(UserIntent.Done(id, isDone)) },
@@ -177,7 +163,7 @@ private fun TodoLists(
   LazyColumn(
     modifier,
     state = todoListState,
-    verticalArrangement = Arrangement.spacedBy(0.dp)
+    verticalArrangement = Arrangement.spacedBy(7.dp)
   ) {
     items(lists, key = { it.id.asInt }) {
       ListRow(
@@ -201,7 +187,6 @@ private fun TodoItems(
     state = todoListState,
     verticalArrangement = Arrangement.spacedBy(7.dp)
   ) {
-
     items(items, key = { it.id.asInt }) {
       ItemRow(
         it,
@@ -225,7 +210,7 @@ private fun ListRow(
   ) {
     Row(
       Modifier
-        .padding(10.dp, 8.dp),
+        .padding(10.dp, 10.dp, 7.dp, 10.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Text(list.text, fontSize = 18.sp)
@@ -274,8 +259,6 @@ private fun ItemRow(
             }
           })
       )
-      // Spacer(Modifier.weight(1f))
-      // TodoItemContextMenu()
     }
   }
 }

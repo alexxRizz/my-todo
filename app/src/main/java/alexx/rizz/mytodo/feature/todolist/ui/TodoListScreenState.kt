@@ -10,7 +10,9 @@ sealed interface TodoListScreenState {
   data class Success(
     val lists: List<TodoList> = emptyList(),
     val items: List<TodoItem> = emptyList(),
-    val listOwnerName: String? = null,
+    val title: String = "",
+    val isBackVisible: Boolean = false,
+    val isListsVisible: Boolean = false,
     val editDialog: TodoEditDialogState? = null,
   ) : TodoListScreenState
 }

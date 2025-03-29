@@ -1,6 +1,5 @@
 package alexx.rizz.mytodo.feature.todolist
 
-import alexx.rizz.mytodo.app.utils.*
 import alexx.rizz.mytodo.feature.*
 import alexx.rizz.mytodo.feature.todolist.ui.*
 import androidx.lifecycle.*
@@ -125,34 +124,27 @@ class TodoListVM @Inject constructor(
   private fun newScreenState(): Flow<TodoListScreenState> {
     val listsFlow = mTodoRep.observeLists()
     val itemsFlow = mListOwnerId.flatMapLatest { newListOwnerId ->
-      val items = if (newListOwnerId == TodoListId.Unknown)
+      if (newListOwnerId == TodoListId.Unknown)
         flowOf(emptyList())
       else
         mTodoRep.observeItems(newListOwnerId)
-      items.asResult()
     }
     return combine(
       listsFlow,
       itemsFlow,
-      mListOwnerId,
       mEditDialogState,
-    ) { lists, items, listOwnerId, editDialogState ->
-      val listOwnerName =
-        if (listOwnerId == TodoListId.Unknown)
-          null
-        else
-          lists.first { it.id == listOwnerId }.text
-      when (items) {
-        is Result.Loading -> TodoListScreenState.Loading
-        is Result.Success -> TodoListScreenState.Success(
-          lists = lists,
-          items = items.data,
-          listOwnerName = listOwnerName,
-          editDialog = editDialogState
-        )
-        is Result.Error -> TODO()
-      }
+    ) { lists, items, editDialogState ->
+      val listOwnerId = mListOwnerId.value
+      val isListsVisible = listOwnerId == TodoListId.Unknown
+      val title = if (isListsVisible) "Списки" else lists.first { it.id == listOwnerId }.text
+      TodoListScreenState.Success(
+        lists = lists,
+        items = items,
+        title = title,
+        isBackVisible = !isListsVisible,
+        isListsVisible = isListsVisible,
+        editDialog = editDialogState
+      )
     }
   }
-
 }

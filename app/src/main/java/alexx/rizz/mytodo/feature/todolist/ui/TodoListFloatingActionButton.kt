@@ -13,14 +13,14 @@ import androidx.compose.ui.unit.*
 
 @Composable
 fun TodoListFloatingActionButton(
-  screenState: TodoListScreenState.Success,
+  isListsVisible: Boolean,
   onUserIntent: (UserIntent) -> Unit,
 ) {
   FloatingActionButton(
     modifier = Modifier.offset(y = (-10).dp),
     containerColor = MyColors.Primary,
     onClick = {
-      val intent = if (screenState.listOwnerName == null)
+      val intent = if (isListsVisible)
         UserIntent.EditList(id = TodoListId.Unknown)
       else
         UserIntent.EditItem(id = TodoItemId.Unknown)
