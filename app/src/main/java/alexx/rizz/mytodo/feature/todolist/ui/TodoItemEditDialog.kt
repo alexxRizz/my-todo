@@ -4,11 +4,15 @@ import alexx.rizz.mytodo.ui.theme.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
 import androidx.compose.foundation.text.*
+import androidx.compose.material.icons.*
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.*
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.tooling.preview.*
 import androidx.compose.ui.unit.*
@@ -18,9 +22,11 @@ import androidx.compose.ui.window.*
 fun TodoItemEditDialog(
   title: String,
   text: String,
+  isDeleteVisible: Boolean,
   onTextChanged: (String) -> Unit = {},
   onCancel: () -> Unit = {},
   onOk: (String) -> Unit = {},
+  onDelete: () -> Unit = {},
 ) {
   Dialog(
     onDismissRequest = onCancel,
@@ -39,7 +45,17 @@ fun TodoItemEditDialog(
           .padding(16.dp)
           .fillMaxWidth(),
       ) {
-        Title(title)
+        Row {
+          Title(title)
+          if (isDeleteVisible) {
+            Spacer(Modifier.weight(1f))
+            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+              IconButton(onDelete, modifier = Modifier.offset(7.dp, (-10).dp)) {
+                  Icon(Icons.Default.Delete, null, tint = Color.Red)
+              }
+            }
+          }
+        }
         val inputState = rememberSaveable { mutableStateOf(text) }
         DescriptionTextField(inputState, onTextChanged)
         DialogButtons(inputState, onCancel, onOk)
@@ -113,7 +129,7 @@ private fun TodoItemEditDialogPreview() {
       contentAlignment = Alignment.Center,
       modifier = Modifier.fillMaxSize(),
     ) {
-      TodoItemEditDialog("Дело", "")
+      TodoItemEditDialog("Редактирование пункта", "", isDeleteVisible = true)
     }
   }
 }

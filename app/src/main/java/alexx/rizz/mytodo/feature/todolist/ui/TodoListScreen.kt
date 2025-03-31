@@ -8,6 +8,8 @@ import androidx.activity.compose.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.*
+import androidx.compose.material.icons.*
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -19,6 +21,8 @@ import androidx.compose.ui.tooling.preview.*
 import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.*
 import androidx.lifecycle.compose.*
+
+private val RowPadding = PaddingValues(10.dp, 5.dp, 0.dp, 5.dp)
 
 @Composable
 fun TodoListScreen(vm: TodoListVM = hiltViewModel()) {
@@ -95,8 +99,9 @@ private fun TodoListLoadedSuccessfully(
       screenState.items,
       screenState.isListsVisible,
       onListClick = { id -> onUserIntent(UserIntent.ShowListItems(id)) },
-      onItemClick = { id -> onUserIntent(UserIntent.EditItem(id)) },
+      onListEditClick = { id -> onUserIntent(UserIntent.EditList(id)) },
       onItemDoneClick = { id, isDone -> onUserIntent(UserIntent.Done(id, isDone)) },
+      onItemEditClick = { id -> onUserIntent(UserIntent.EditItem(id)) },
     )
     when (screenState.editDialog) {
       null -> Unit
@@ -104,19 +109,22 @@ private fun TodoListLoadedSuccessfully(
         TodoItemEditDialog(
           title = screenState.editDialog.title,
           text = screenState.editDialog.text,
+          isDeleteVisible = screenState.editDialog.isDeleteVisible,
           onCancel = { onUserIntent(UserIntent.CancelEditing) },
-          onOk = { onUserIntent(UserIntent.ConfirmListEditing(screenState.editDialog.id, it)) },
+          onOk = { text -> onUserIntent(UserIntent.ConfirmListEditing(screenState.editDialog.id, text)) },
+          onDelete = { onUserIntent(UserIntent.DeleteList(screenState.editDialog.id)) },
         )
 
       is TodoEditDialogState.Item ->
         TodoItemEditDialog(
           title = screenState.editDialog.title,
           text = screenState.editDialog.text,
+          isDeleteVisible = screenState.editDialog.isDeleteVisible,
           onCancel = { onUserIntent(UserIntent.CancelEditing) },
-          onOk = { onUserIntent(UserIntent.ConfirmItemEditing(screenState.editDialog.id, it)) },
+          onOk = { text -> onUserIntent(UserIntent.ConfirmItemEditing(screenState.editDialog.id, text)) },
+          onDelete = { onUserIntent(UserIntent.DeleteItem(screenState.editDialog.id)) },
         )
     }
-
   }
 }
 
@@ -127,15 +135,16 @@ private fun TodoList(
   items: List<TodoItem>,
   useListsOrItems: Boolean,
   onListClick: (TodoListId) -> Unit,
-  onItemClick: (TodoItemId) -> Unit,
+  onListEditClick: (TodoListId) -> Unit,
   onItemDoneClick: (TodoItemId, Boolean) -> Unit,
+  onItemEditClick: (TodoItemId) -> Unit,
 ) {
   if ((useListsOrItems && lists.isEmpty()) || (!useListsOrItems && items.isEmpty()))
     TodoListEmpty(modifier, useListsOrItems)
   else if (useListsOrItems)
-    TodoLists(modifier, lists, onListClick)
+    TodoLists(modifier, lists, onListClick, onListEditClick)
   else
-    TodoItems(modifier, items, onItemClick, onItemDoneClick)
+    TodoItems(modifier, items, onItemDoneClick, onItemEditClick)
 }
 
 @Composable
@@ -157,7 +166,8 @@ private fun TodoListEmpty(modifier: Modifier, useListsOrItems: Boolean) {
 private fun TodoLists(
   modifier: Modifier,
   lists: List<TodoList>,
-  onListClick: (TodoListId) -> Unit,
+  onClick: (TodoListId) -> Unit,
+  onEditClick: (TodoListId) -> Unit,
 ) {
   val todoListState = rememberLazyListState()
   LazyColumn(
@@ -166,10 +176,7 @@ private fun TodoLists(
     verticalArrangement = Arrangement.spacedBy(7.dp)
   ) {
     items(lists, key = { it.id.asInt }) {
-      ListRow(
-        it,
-        onClick = { onListClick(it.id) },
-      )
+      ListRow(it, onClick = onClick, onEditClick = onEditClick)
     }
   }
 }
@@ -178,8 +185,8 @@ private fun TodoLists(
 private fun TodoItems(
   modifier: Modifier,
   items: List<TodoItem>,
-  onItemClick: (TodoItemId) -> Unit,
-  onItemDoneClick: (TodoItemId, Boolean) -> Unit,
+  onDoneClick: (TodoItemId, Boolean) -> Unit,
+  onEditClick: (TodoItemId) -> Unit,
 ) {
   val todoListState = rememberLazyListState()
   LazyColumn(
@@ -190,8 +197,8 @@ private fun TodoItems(
     items(items, key = { it.id.asInt }) {
       ItemRow(
         it,
-        onDoneClick = { isDone -> onItemDoneClick(it.id, isDone) },
-        onClick = { onItemClick(it.id) },
+        onDoneClick = { isDone -> onDoneClick(it.id, isDone) },
+        onEditClick = { onEditClick(it.id) },
       )
     }
   }
@@ -200,20 +207,24 @@ private fun TodoItems(
 @Composable
 private fun ListRow(
   list: TodoList,
-  onClick: () -> Unit,
+  onClick: (TodoListId) -> Unit,
+  onEditClick: (TodoListId) -> Unit,
 ) {
   Card(
     modifier = Modifier.fillMaxWidth(),
     shape = RoundedCornerShape(5.dp),
     colors = CardDefaults.cardColors(containerColor = MyColors.UndoneCard),
-    onClick = onClick
+    onClick = { onClick(list.id) },
   ) {
     Row(
-      Modifier
-        .padding(10.dp, 10.dp, 7.dp, 10.dp),
+      Modifier.padding(RowPadding),
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Text(list.text, fontSize = 18.sp)
+      Spacer(Modifier.weight(1f))
+      CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+        IconButton(onClick = { onEditClick(list.id) }) { Icon(Icons.Default.Edit, null) }
+      }
     }
   }
 }
@@ -222,7 +233,7 @@ private fun ListRow(
 private fun ItemRow(
   item: TodoItem,
   onDoneClick: (Boolean) -> Unit,
-  onClick: () -> Unit,
+  onEditClick: () -> Unit,
 ) {
   Card(
     modifier = Modifier.fillMaxWidth(),
@@ -230,11 +241,9 @@ private fun ItemRow(
     colors = CardDefaults.cardColors(
       containerColor = if (item.isDone) MyColors.DoneCard else MyColors.UndoneCard,
     ),
-    onClick = onClick
   ) {
     Row(
-      Modifier
-        .padding(10.dp, 5.dp, 7.dp, 5.dp),
+      Modifier.padding(RowPadding),
       verticalAlignment = Alignment.CenterVertically,
     ) {
       CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 20.dp) {
@@ -259,6 +268,10 @@ private fun ItemRow(
             }
           })
       )
+      Spacer(Modifier.weight(1f))
+      CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+        IconButton(onEditClick) { Icon(Icons.Default.Edit, null) }
+      }
     }
   }
 }

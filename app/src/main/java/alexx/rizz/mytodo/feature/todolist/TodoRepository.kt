@@ -12,10 +12,13 @@ interface ITodoRepository {
   suspend fun addItem(item: TodoItem)
   suspend fun doneItem(id: TodoItemId, isDone: Boolean)
   suspend fun updateItem(id: TodoItemId, text: String)
+  suspend fun removeItem(id: TodoItemId)
 
   fun observeLists(): Flow<List<TodoList>>
+  suspend fun getListById(id: TodoListId): TodoList?
   suspend fun addList(list: TodoList)
   suspend fun updateList(id: TodoListId, text: String)
+  suspend fun removeList(id: TodoListId)
 }
 
 private val Log = getLogger<TodoRepository>()
@@ -49,13 +52,20 @@ class TodoRepository @Inject constructor(
   }
 
   override suspend fun updateItem(id: TodoItemId, text: String) {
-    mItemDao.updateTodo(id, text)
+    mItemDao.update(id, text)
+  }
+
+  override suspend fun removeItem(id: TodoItemId) {
+    mItemDao.delete(id)
   }
 
   override fun observeLists(): Flow<List<TodoList>> =
     mListDao
       .observeAll()
       .map { entities -> entities.map { it.toDomain() } }
+
+  override suspend fun getListById(id: TodoListId): TodoList? =
+    mListDao.byId(id)?.toDomain()
 
   override suspend fun addList(list: TodoList) {
     db.withTransaction {
@@ -67,6 +77,10 @@ class TodoRepository @Inject constructor(
 
   override suspend fun updateList(id: TodoListId, text: String) {
     mListDao.updateList(id, text)
+  }
+
+  override suspend fun removeList(id: TodoListId) {
+    mListDao.delete(id)
   }
 }
 

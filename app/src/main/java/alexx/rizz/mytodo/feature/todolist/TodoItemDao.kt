@@ -13,7 +13,10 @@ interface TodoItemDao {
   suspend fun done(id: TodoItemId, isDone: Boolean)
 
   @Query("UPDATE todoItems SET text=:text WHERE id=:id")
-  suspend fun updateTodo(id: TodoItemId, text: String)
+  suspend fun update(id: TodoItemId, text: String)
+
+  @Query("DELETE FROM todoItems WHERE id=:id")
+  suspend fun delete(id: TodoItemId)
 
   @Query("SELECT COUNT(1) FROM todoItems")
   suspend fun count(): Int

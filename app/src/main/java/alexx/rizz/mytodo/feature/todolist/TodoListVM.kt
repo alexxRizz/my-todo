@@ -23,6 +23,8 @@ class TodoListVM @Inject constructor(
     data class ConfirmListEditing(val id: TodoListId, val text: String) : UserIntent
     data class ConfirmItemEditing(val id: TodoItemId, val text: String) : UserIntent
     data class Done(val id: TodoItemId, val isDone: Boolean) : UserIntent
+    data class DeleteList(val id: TodoListId) : UserIntent
+    data class DeleteItem(val id: TodoItemId) : UserIntent
   }
 
   private val mEditDialogState = MutableStateFlow<TodoEditDialogState?>(null)
@@ -51,6 +53,8 @@ class TodoListVM @Inject constructor(
         is UserIntent.ConfirmListEditing -> onConfirmListEditing(intent)
         is UserIntent.ConfirmItemEditing -> onConfirmItemEditing(intent)
         is UserIntent.Done -> onDone(intent)
+        is UserIntent.DeleteList -> onDeleteList(intent)
+        is UserIntent.DeleteItem -> onDeleteItem(intent)
       }
     }
 
@@ -62,12 +66,19 @@ class TodoListVM @Inject constructor(
       mListOwnerId.value = intent.listOwnerId
     }
 
-    private fun onEditList(intent: UserIntent.EditList) {
+    private suspend fun onEditList(intent: UserIntent.EditList) {
       if (intent.id == TodoListId.Unknown) {
         showEditDialog(TodoEditDialogState.List(title = "Новый список"))
         return
       }
-      // TODO
+      val list = mTodoRep.getListById(intent.id)
+        ?: return
+      showEditDialog(TodoEditDialogState.List(
+        id = list.id,
+        title = "Редактирование списка",
+        text = list.text,
+        isDeleteVisible = true,
+      ))
     }
 
     private suspend fun onEditItem(intent: UserIntent.EditItem) {
@@ -75,12 +86,13 @@ class TodoListVM @Inject constructor(
         showEditDialog(TodoEditDialogState.Item(title = "Новый пункт"))
         return
       }
-      val todo = mTodoRep.getItemById(intent.id)
+      val item = mTodoRep.getItemById(intent.id)
         ?: return
       showEditDialog(TodoEditDialogState.Item(
-        id = todo.id,
+        id = item.id,
         title = "Редактирование пункта",
-        text = todo.text
+        text = item.text,
+        isDeleteVisible = true,
       ))
     }
 
@@ -110,6 +122,16 @@ class TodoListVM @Inject constructor(
 
     private suspend fun onDone(intent: UserIntent.Done) {
       mTodoRep.doneItem(intent.id, intent.isDone)
+    }
+
+    private suspend fun onDeleteList(intent: UserIntent.DeleteList) {
+      mTodoRep.removeList(intent.id)
+      hideEditDialog()
+    }
+
+    private suspend fun onDeleteItem(intent: UserIntent.DeleteItem) {
+      mTodoRep.removeItem(intent.id)
+      hideEditDialog()
     }
 
     private fun showEditDialog(state: TodoEditDialogState) {

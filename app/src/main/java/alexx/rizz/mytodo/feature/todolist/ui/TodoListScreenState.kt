@@ -23,11 +23,13 @@ sealed interface TodoEditDialogState {
     val id: TodoItemId = TodoItemId.Unknown,
     val title: String = "",
     val text: String = "",
+    val isDeleteVisible: Boolean = false,
   ) : TodoEditDialogState
 
   data class List(
     val id: TodoListId = TodoListId.Unknown,
     val title: String = "",
     val text: String = "",
+    val isDeleteVisible: Boolean = false,
   ) : TodoEditDialogState
 }
