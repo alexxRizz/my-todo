@@ -6,19 +6,21 @@ import androidx.room.*
 import kotlinx.coroutines.flow.*
 import javax.inject.*
 
-interface ITodoRepository {
+interface ITodoRepository : IRepository {
   fun observeItems(listOwnerId: TodoListId): Flow<List<TodoItem>>
   suspend fun getItemById(id: TodoItemId): TodoItem?
   suspend fun addItem(item: TodoItem)
   suspend fun doneItem(id: TodoItemId, isDone: Boolean)
   suspend fun updateItem(id: TodoItemId, text: String)
   suspend fun removeItem(id: TodoItemId)
+  suspend fun reorderItems(reordered: List<TodoItem>)
 
   fun observeLists(): Flow<List<TodoList>>
   suspend fun getListById(id: TodoListId): TodoList?
   suspend fun addList(list: TodoList)
   suspend fun updateList(id: TodoListId, text: String)
   suspend fun removeList(id: TodoListId)
+  suspend fun reorderLists(reordered: List<TodoList>)
 }
 
 private val Log = getLogger<TodoRepository>()
@@ -59,6 +61,14 @@ class TodoRepository @Inject constructor(
     mItemDao.delete(id)
   }
 
+  override suspend fun reorderItems(reordered: List<TodoItem>) {
+    inTransaction {
+      reordered.forEachIndexed { i, it ->
+        mItemDao.updateItemOrder(it.id, i)
+      }
+    }
+  }
+
   override fun observeLists(): Flow<List<TodoList>> =
     mListDao
       .observeAll()
@@ -68,7 +78,7 @@ class TodoRepository @Inject constructor(
     mListDao.byId(id)?.toDomain()
 
   override suspend fun addList(list: TodoList) {
-    db.withTransaction {
+    inTransaction {
       val maxOrderNumber = mListDao.getMaxOrderNumber()
       mListDao.upsert(list.toEntity(maxOrderNumber + 1))
     }
@@ -81,6 +91,14 @@ class TodoRepository @Inject constructor(
 
   override suspend fun removeList(id: TodoListId) {
     mListDao.delete(id)
+  }
+
+  override suspend fun reorderLists(reordered: List<TodoList>) {
+    inTransaction {
+      reordered.forEachIndexed { i, it ->
+        mListDao.updateListOrder(it.id, i)
+      }
+    }
   }
 }
 

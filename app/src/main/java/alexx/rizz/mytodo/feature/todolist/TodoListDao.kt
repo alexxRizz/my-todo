@@ -26,4 +26,7 @@ interface TodoListDao {
 
   @Query("SELECT MAX(orderNumber) FROM todoLists")
   suspend fun getMaxOrderNumber(): Int
+
+  @Query("UPDATE todoLists SET orderNumber=:orderNumber WHERE id=:id")
+  suspend fun updateListOrder(id: TodoListId, orderNumber: Int)
 }

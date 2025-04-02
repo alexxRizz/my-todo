@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.*
 import javax.inject.*
 import kotlin.time.Duration.Companion.seconds
 
+// private val Log = getLogger<TodoListVM>()
+
 @HiltViewModel
 class TodoListVM @Inject constructor(
   private val mTodoRep: ITodoRepository,
@@ -25,6 +27,8 @@ class TodoListVM @Inject constructor(
     data class Done(val id: TodoItemId, val isDone: Boolean) : UserIntent
     data class DeleteList(val id: TodoListId) : UserIntent
     data class DeleteItem(val id: TodoItemId) : UserIntent
+    data class ReorderLists(val reordered: List<TodoList>) : UserIntent
+    data class ReorderItems(val reordered: List<TodoItem>) : UserIntent
   }
 
   private val mEditDialogState = MutableStateFlow<TodoEditDialogState?>(null)
@@ -55,6 +59,8 @@ class TodoListVM @Inject constructor(
         is UserIntent.Done -> onDone(intent)
         is UserIntent.DeleteList -> onDeleteList(intent)
         is UserIntent.DeleteItem -> onDeleteItem(intent)
+        is UserIntent.ReorderLists -> onReorderLists(intent)
+        is UserIntent.ReorderItems -> onReorderItems(intent)
       }
     }
 
@@ -132,6 +138,14 @@ class TodoListVM @Inject constructor(
     private suspend fun onDeleteItem(intent: UserIntent.DeleteItem) {
       mTodoRep.removeItem(intent.id)
       hideEditDialog()
+    }
+
+    private suspend fun onReorderLists(intent: UserIntent.ReorderLists) {
+      mTodoRep.reorderLists(intent.reordered)
+    }
+
+    private suspend fun onReorderItems(intent: UserIntent.ReorderItems) {
+      mTodoRep.reorderItems(intent.reordered)
     }
 
     private fun showEditDialog(state: TodoEditDialogState) {

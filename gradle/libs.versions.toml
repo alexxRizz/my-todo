@@ -13,8 +13,8 @@ activityCompose = "1.10.1"
 composeBom = "2025.03.00"
 navigationCompose = "2.8.9"
 ksp = "2.1.10-1.0.31"
-#room = "2.6.1"
 room = "2.7.0-rc03"
+reorderable = "2.4.3"
 hilt = "2.56"
 hiltNavigationCompose = "1.2.0"
 slf4j = "1.7.36" # slf4j 2.x not yet supported by logback-android
@@ -42,6 +42,7 @@ hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-com
 slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 logback-android = { group = "com.github.tony19", name = "logback-android", version.ref = "logbackAndroid" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 
 # testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

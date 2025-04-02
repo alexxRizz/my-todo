@@ -29,4 +29,7 @@ interface TodoItemDao {
 
   @Query("SELECT MAX(orderNumber) FROM todoItems")
   suspend fun getMaxOrderNumber(): Int
+
+  @Query("UPDATE todoItems SET orderNumber=:orderNumber WHERE id=:id")
+  suspend fun updateItemOrder(id: TodoItemId, orderNumber: Int)
 }

@@ -1,10 +1,7 @@
 package alexx.rizz.mytodo.ui
 
-import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.platform.*
-import androidx.compose.ui.unit.*
 
 inline fun Modifier.conditional(
   condition: Boolean,
@@ -16,15 +13,19 @@ inline fun Modifier.conditional(
   else
     then(ifFalse(Modifier))
 
+// @Composable
+// fun PaddingValues.copy(
+//   start: Dp = calculateStartPadding(LocalLayoutDirection.current),
+//   top: Dp = calculateTopPadding(),
+//   end: Dp = calculateEndPadding(LocalLayoutDirection.current),
+//   bottom: Dp = calculateBottomPadding(),
+// ) = PaddingValues(
+//   start = start,
+//   top = top,
+//   end = end,
+//   bottom = bottom
+// )
+
 @Composable
-fun PaddingValues.copy(
-  start: Dp = calculateStartPadding(LocalLayoutDirection.current),
-  top: Dp = calculateTopPadding(),
-  end: Dp = calculateEndPadding(LocalLayoutDirection.current),
-  bottom: Dp = calculateBottomPadding(),
-) = PaddingValues(
-  start = start,
-  top = top,
-  end = end,
-  bottom = bottom
-)
+fun <T> rememberUpdatedStateMutable(newValue: T): MutableState<T> =
+  rememberUpdatedState(newValue) as MutableState
