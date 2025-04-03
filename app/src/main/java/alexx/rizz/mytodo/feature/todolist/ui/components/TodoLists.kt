@@ -73,8 +73,11 @@ private fun ReorderableCollectionItemScope.ListRow(
       Modifier.padding(RowPadding),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      Text(list.text, fontSize = 18.sp)
-      Spacer(Modifier.weight(1f))
+      Text(
+        modifier = Modifier.weight(1f),
+        text = list.text,
+        fontSize = 18.sp,
+      )
       CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
         IconButton(onClick = { onEditClick(list.id) }) { Icon(Icons.Default.Edit, null) }
       }

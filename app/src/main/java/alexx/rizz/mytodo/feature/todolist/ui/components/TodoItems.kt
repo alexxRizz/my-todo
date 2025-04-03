@@ -78,29 +78,33 @@ private fun ReorderableCollectionItemScope.ItemRow(
       Modifier.padding(RowPadding),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 20.dp) {
-        Checkbox(
-          item.isDone,
-          colors = CheckboxDefaults.colors(checkedColor = MyColors.UndoneCard),
-          modifier = Modifier
-            .scale(1.5f)
-            .padding(vertical = 5.dp),
-          onCheckedChange = onDoneClick,
+      Row(
+        Modifier.weight(1f),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 20.dp) {
+          Checkbox(
+            item.isDone,
+            colors = CheckboxDefaults.colors(checkedColor = MyColors.UndoneCard),
+            modifier = Modifier
+              .scale(1.5f)
+              .padding(vertical = 5.dp),
+            onCheckedChange = onDoneClick,
+          )
+        }
+        Spacer(Modifier.width(10.dp))
+        Text(item.text, fontSize = 18.sp, modifier =
+          Modifier
+            .conditional(item.isDone, {
+              val crossColor = MyColors.UndoneCard
+              val strokeWidth = 11f
+              drawBehind {
+                drawLine(crossColor, Offset(0f, 0f), Offset(size.width, size.height), strokeWidth = strokeWidth)
+                drawLine(crossColor, Offset(0f, size.height), Offset(size.width, 0f), strokeWidth = strokeWidth)
+              }
+            })
         )
       }
-      Spacer(Modifier.width(10.dp))
-      Text(item.text, fontSize = 18.sp, modifier =
-        Modifier
-          .conditional(item.isDone, {
-            val crossColor = MyColors.UndoneCard
-            val strokeWidth = 11f
-            drawBehind {
-              drawLine(crossColor, Offset(0f, 0f), Offset(size.width, size.height), strokeWidth = strokeWidth)
-              drawLine(crossColor, Offset(0f, size.height), Offset(size.width, 0f), strokeWidth = strokeWidth)
-            }
-          })
-      )
-      Spacer(Modifier.weight(1f))
       CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
         IconButton(onEditClick) { Icon(Icons.Default.Edit, null) }
       }
