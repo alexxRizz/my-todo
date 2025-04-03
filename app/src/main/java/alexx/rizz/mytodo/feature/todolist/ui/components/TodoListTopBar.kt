@@ -1,4 +1,4 @@
-package alexx.rizz.mytodo.feature.todolist.ui
+package alexx.rizz.mytodo.feature.todolist.ui.components
 
 import alexx.rizz.mytodo.ui.theme.MyColors
 import androidx.compose.foundation.layout.heightIn

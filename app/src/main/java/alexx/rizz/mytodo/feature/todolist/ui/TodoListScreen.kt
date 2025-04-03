@@ -2,6 +2,7 @@ package alexx.rizz.mytodo.feature.todolist.ui
 
 import alexx.rizz.mytodo.feature.todolist.*
 import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
+import alexx.rizz.mytodo.feature.todolist.ui.components.*
 import alexx.rizz.mytodo.ui.theme.*
 import androidx.activity.compose.*
 import androidx.compose.foundation.layout.*
@@ -109,7 +110,6 @@ private fun TodoListLoadedSuccessfully(
           onOk = { text -> onUserIntent(UserIntent.ConfirmListEditing(screenState.editDialog.id, text)) },
           onDelete = { onUserIntent(UserIntent.DeleteList(screenState.editDialog.id)) },
         )
-
       is TodoEditDialogState.Item ->
         TodoItemEditDialog(
           title = screenState.editDialog.title,

@@ -1,7 +1,7 @@
 package alexx.rizz.mytodo.feature.todolist
 
 import alexx.rizz.mytodo.feature.*
-import alexx.rizz.mytodo.feature.todolist.ui.*
+import alexx.rizz.mytodo.feature.todolist.ui.components.*
 import androidx.lifecycle.*
 import dagger.hilt.android.lifecycle.*
 import kotlinx.coroutines.*

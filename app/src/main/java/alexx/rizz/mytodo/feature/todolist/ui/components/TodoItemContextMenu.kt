@@ -1,4 +1,4 @@
-package alexx.rizz.mytodo.feature.todolist.ui
+package alexx.rizz.mytodo.feature.todolist.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.*
@@ -6,7 +6,6 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.unit.*
 
 @Composable
 fun TodoItemContextMenu() {
