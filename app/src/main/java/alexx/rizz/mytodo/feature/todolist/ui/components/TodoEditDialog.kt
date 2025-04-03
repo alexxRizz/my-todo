@@ -1,6 +1,8 @@
 package alexx.rizz.mytodo.feature.todolist.ui.components
 
 import alexx.rizz.mytodo.R
+import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
+import alexx.rizz.mytodo.feature.todolist.ui.*
 import alexx.rizz.mytodo.ui.theme.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
@@ -20,7 +22,31 @@ import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
 
 @Composable
-fun TodoItemEditDialog(
+fun TodoEditDialog(editDialog: TodoEditDialogState, onUserIntent: (UserIntent) -> Unit) {
+  when (editDialog) {
+    is TodoEditDialogState.List ->
+      TodoEditDialogContent(
+        title = editDialog.title,
+        text = editDialog.text,
+        isDeleteVisible = editDialog.isDeleteVisible,
+        onCancel = { onUserIntent(UserIntent.CancelEditing) },
+        onOk = { text -> onUserIntent(UserIntent.ConfirmListEditing(editDialog.id, text)) },
+        onDelete = { onUserIntent(UserIntent.DeleteList(editDialog.id)) },
+      )
+    is TodoEditDialogState.Item ->
+      TodoEditDialogContent(
+        title = editDialog.title,
+        text = editDialog.text,
+        isDeleteVisible = editDialog.isDeleteVisible,
+        onCancel = { onUserIntent(UserIntent.CancelEditing) },
+        onOk = { text -> onUserIntent(UserIntent.ConfirmItemEditing(editDialog.id, text)) },
+        onDelete = { onUserIntent(UserIntent.DeleteItem(editDialog.id)) },
+      )
+  }
+}
+
+@Composable
+private fun TodoEditDialogContent(
   title: String,
   text: String,
   isDeleteVisible: Boolean,
@@ -47,7 +73,7 @@ fun TodoItemEditDialog(
           .fillMaxWidth(),
       ) {
         Row {
-          Title(title)
+          Text(text = title, fontSize = 20.sp) // title
           if (isDeleteVisible) {
             Spacer(Modifier.weight(1f))
             CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
@@ -63,14 +89,6 @@ fun TodoItemEditDialog(
       }
     }
   }
-}
-
-@Composable
-private fun Title(title: String) {
-  Text(
-    text = title,
-    fontSize = 20.sp
-  )
 }
 
 @Composable
@@ -91,21 +109,7 @@ private fun DescriptionTextField(input: MutableState<String>, onTextChanged: (St
       .fillMaxWidth(),
   )
   LaunchedEffect(Unit) {
-    focusRequester.requestFocus()
-  }
-}
-
-@Composable
-@Preview(locale = "ru", showBackground = true, showSystemUi = true)
-@Preview(locale = "en", showBackground = true, showSystemUi = true)
-private fun TodoItemEditDialogPreview() {
-  MyTodoTheme {
-    Box(
-      contentAlignment = Alignment.Center,
-      modifier = Modifier.fillMaxSize(),
-    ) {
-      TodoItemEditDialog(stringResource(R.string.edit_item_dialog_title), "", isDeleteVisible = true)
-    }
+    focusRequester.requestFocus() // для показа клавиатуры
   }
 }
 
@@ -132,6 +136,20 @@ private fun DialogButtons(inputState: MutableState<String>, onCancel: () -> Unit
       shape = shape,
     ) {
       Text(stringResource(R.string.dialog_ok))
+    }
+  }
+}
+
+@Composable
+@Preview(locale = "ru", showBackground = true, showSystemUi = true)
+@Preview(locale = "en", showBackground = true, showSystemUi = true)
+private fun TodoItemEditDialogPreview() {
+  MyTodoTheme {
+    Box(
+      contentAlignment = Alignment.Center,
+      modifier = Modifier.fillMaxSize(),
+    ) {
+      TodoEditDialogContent(stringResource(R.string.edit_item_dialog_title), "", isDeleteVisible = true)
     }
   }
 }

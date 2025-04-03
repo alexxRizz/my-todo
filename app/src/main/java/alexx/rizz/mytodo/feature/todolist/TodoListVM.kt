@@ -2,7 +2,7 @@ package alexx.rizz.mytodo.feature.todolist
 
 import alexx.rizz.mytodo.feature.*
 import alexx.rizz.mytodo.feature.common.*
-import alexx.rizz.mytodo.feature.todolist.ui.components.*
+import alexx.rizz.mytodo.feature.todolist.ui.*
 import androidx.lifecycle.*
 import dagger.hilt.android.lifecycle.*
 import kotlinx.coroutines.*
@@ -173,21 +173,17 @@ class TodoListVM @Inject constructor(
       mEditDialogState,
     ) { lists, items, editDialogState ->
       val listOwnerId = mListOwnerId.value
-      val isListsVisible = listOwnerId == TodoListId.Unknown
-      val title = getScreenTitle(isListsVisible, lists, listOwnerId)
-      TodoListScreenState.Success(
-        lists = lists,
-        items = items,
-        title = title,
-        isBackVisible = !isListsVisible,
-        isListsVisible = isListsVisible,
-        editDialog = editDialogState
-      )
+      val showLists = listOwnerId == TodoListId.Unknown
+      val title = getScreenTitle(showLists, lists, listOwnerId)
+      if (showLists)
+        TodoListScreenState.SuccessLists(lists, title, editDialogState)
+      else
+        TodoListScreenState.SuccessItems(items, title, editDialogState)
     }
   }
 
-  private fun getScreenTitle(isListsVisible: Boolean, lists: List<TodoList>, listOwnerId: TodoListId): String =
-    if (isListsVisible)
+  private fun getScreenTitle(showLists: Boolean, lists: List<TodoList>, listOwnerId: TodoListId): String =
+    if (showLists)
       mResources.getString(ResStringId.ListsTitle)
     else
       lists.first { it.id == listOwnerId }.text

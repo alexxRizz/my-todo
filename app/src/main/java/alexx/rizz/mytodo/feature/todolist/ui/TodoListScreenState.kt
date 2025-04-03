@@ -1,4 +1,4 @@
-package alexx.rizz.mytodo.feature.todolist.ui.components
+package alexx.rizz.mytodo.feature.todolist.ui
 
 import alexx.rizz.mytodo.feature.todolist.*
 
@@ -6,15 +6,22 @@ sealed interface TodoListScreenState {
 
   data object Loading : TodoListScreenState
 
-  // TODO: разделить состояние на SuccessLists и SuccessItems ?
-  data class Success(
+  sealed interface Success : TodoListScreenState {
+    val title: String
+    val editDialog: TodoEditDialogState?
+  }
+
+  data class SuccessLists(
     val lists: List<TodoList> = emptyList(),
+    override val title: String = "",
+    override val editDialog: TodoEditDialogState? = null,
+  ) : Success
+
+  data class SuccessItems(
     val items: List<TodoItem> = emptyList(),
-    val title: String = "",
-    val isBackVisible: Boolean = false,
-    val isListsVisible: Boolean = false,
-    val editDialog: TodoEditDialogState? = null,
-  ) : TodoListScreenState
+    override val title: String = "",
+    override val editDialog: TodoEditDialogState? = null,
+  ) : Success
 }
 
 sealed interface TodoEditDialogState {
