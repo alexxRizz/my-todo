@@ -13,6 +13,11 @@ inline fun Modifier.conditional(
   else
     then(ifFalse(Modifier))
 
+@Composable
+fun <T> rememberUpdatedStateMutable(newValue: T): MutableState<T> =
+  rememberUpdatedState(newValue) as MutableState
+
+// Может пригодиться
 // @Composable
 // fun PaddingValues.copy(
 //   start: Dp = calculateStartPadding(LocalLayoutDirection.current),
@@ -26,6 +31,9 @@ inline fun Modifier.conditional(
 //   bottom = bottom
 // )
 
-@Composable
-fun <T> rememberUpdatedStateMutable(newValue: T): MutableState<T> =
-  rememberUpdatedState(newValue) as MutableState
+// Может пригодиться
+// fun Modifier.selectAllOnFocus(input: MutableState<TextFieldValue>): Modifier =
+//   this.onFocusChanged {
+//     if (it.isFocused)
+//       input.value = input.value.copy(selection = TextRange(0, input.value.text.length))
+//   }

@@ -11,11 +11,11 @@ import androidx.compose.material.icons.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.*
 import androidx.compose.ui.*
 import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.res.*
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.tooling.preview.*
 import androidx.compose.ui.unit.*
@@ -83,22 +83,22 @@ private fun TodoEditDialogContent(
             }
           }
         }
-        val inputState = rememberSaveable { mutableStateOf(text) }
-        DescriptionTextField(inputState, onTextChanged)
-        DialogButtons(inputState, onCancel, onOk)
+        val input = remember { mutableStateOf(TextFieldValue(text, TextRange(0, text.length))) }
+        DescriptionTextField(input, onTextChanged)
+        DialogButtons(input, onCancel, onOk)
       }
     }
   }
 }
 
 @Composable
-private fun DescriptionTextField(input: MutableState<String>, onTextChanged: (String) -> Unit) {
+private fun DescriptionTextField(input: MutableState<TextFieldValue>, onTextChanged: (String) -> Unit) {
   val focusRequester = remember { FocusRequester() }
   OutlinedTextField(
     value = input.value,
     onValueChange = {
       input.value = it
-      onTextChanged(it)
+      onTextChanged(it.text)
     },
     maxLines = 3,
     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -114,7 +114,7 @@ private fun DescriptionTextField(input: MutableState<String>, onTextChanged: (St
 }
 
 @Composable
-private fun DialogButtons(inputState: MutableState<String>, onCancel: () -> Unit, onOk: (String) -> Unit) {
+private fun DialogButtons(input: State<TextFieldValue>, onCancel: () -> Unit, onOk: (String) -> Unit) {
   Row(
     modifier = Modifier
       .fillMaxWidth(),
@@ -131,7 +131,7 @@ private fun DialogButtons(inputState: MutableState<String>, onCancel: () -> Unit
       Text(stringResource(R.string.dialog_cancel))
     }
     Button(
-      onClick = { onOk(inputState.value) },
+      onClick = { onOk(input.value.text) },
       modifier = modifiers,
       shape = shape,
     ) {
