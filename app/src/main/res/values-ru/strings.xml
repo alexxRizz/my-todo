@@ -1,0 +1,12 @@
+<resources>
+  <string name="lists_title">Списки</string>
+  <string name="dialog_cancel">Отмена</string>
+  <string name="dialog_ok">ОК</string>
+  <string name="edit_item_dialog_prompt">Введите описание</string>
+  <string name="edit_item_dialog_title">Редактирование пункта</string>
+  <string name="edit_item_dialog_title_new">Новый пункт</string>
+  <string name="edit_list_dialog_title">Редактирование списка</string>
+  <string name="edit_list_dialog_title_new">Новый список</string>
+  <string name="no_lists_prompt">Добавьте список</string>
+  <string name="no_items_prompt">Добавьте пункт</string>
+</resources>

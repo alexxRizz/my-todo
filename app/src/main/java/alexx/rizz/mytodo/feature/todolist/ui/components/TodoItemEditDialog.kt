@@ -1,5 +1,6 @@
 package alexx.rizz.mytodo.feature.todolist.ui.components
 
+import alexx.rizz.mytodo.R
 import alexx.rizz.mytodo.ui.theme.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
@@ -10,9 +11,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.*
 import androidx.compose.ui.*
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.res.*
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.tooling.preview.*
 import androidx.compose.ui.unit.*
@@ -51,7 +52,7 @@ fun TodoItemEditDialog(
             Spacer(Modifier.weight(1f))
             CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
               IconButton(onDelete, modifier = Modifier.offset(7.dp, (-10).dp)) {
-                  Icon(Icons.Default.Delete, null, tint = Color.Red)
+                Icon(Icons.Default.Delete, null, tint = Color.Red)
               }
             }
           }
@@ -83,7 +84,7 @@ private fun DescriptionTextField(input: MutableState<String>, onTextChanged: (St
     },
     maxLines = 3,
     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-    label = { Text("Введите описание") },
+    label = { Text(stringResource(R.string.edit_item_dialog_prompt)) },
     modifier = Modifier
       .focusRequester(focusRequester)
       .padding(top = 20.dp, bottom = 30.dp)
@@ -91,6 +92,20 @@ private fun DescriptionTextField(input: MutableState<String>, onTextChanged: (St
   )
   LaunchedEffect(Unit) {
     focusRequester.requestFocus()
+  }
+}
+
+@Composable
+@Preview(locale = "ru", showBackground = true, showSystemUi = true)
+@Preview(locale = "en", showBackground = true, showSystemUi = true)
+private fun TodoItemEditDialogPreview() {
+  MyTodoTheme {
+    Box(
+      contentAlignment = Alignment.Center,
+      modifier = Modifier.fillMaxSize(),
+    ) {
+      TodoItemEditDialog(stringResource(R.string.edit_item_dialog_title), "", isDeleteVisible = true)
+    }
   }
 }
 
@@ -109,27 +124,14 @@ private fun DialogButtons(inputState: MutableState<String>, onCancel: () -> Unit
       modifier = modifiers,
       shape = shape,
     ) {
-      Text("Отмена")
+      Text(stringResource(R.string.dialog_cancel))
     }
     Button(
       onClick = { onOk(inputState.value) },
       modifier = modifiers,
       shape = shape,
     ) {
-      Text("ОК")
-    }
-  }
-}
-
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-private fun TodoItemEditDialogPreview() {
-  MyTodoTheme {
-    Box(
-      contentAlignment = Alignment.Center,
-      modifier = Modifier.fillMaxSize(),
-    ) {
-      TodoItemEditDialog("Редактирование пункта", "", isDeleteVisible = true)
+      Text(stringResource(R.string.dialog_ok))
     }
   }
 }

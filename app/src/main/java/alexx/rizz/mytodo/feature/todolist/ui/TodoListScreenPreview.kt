@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.tooling.preview.*
-import alexx.rizz.mytodo.feature.todolist.TodoList
 
 private class TodoListScreenPreviewParameterProvider : PreviewParameterProvider<TodoListScreenState> {
   override val values = sequenceOf(
@@ -32,7 +31,8 @@ private class TodoListScreenPreviewParameterProvider : PreviewParameterProvider<
 }
 
 @Composable
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(locale = "ru", showBackground = true, showSystemUi = true)
+@Preview(locale = "en", showBackground = true, showSystemUi = true)
 private fun TodoListScreenPreview(
   @PreviewParameter(TodoListScreenPreviewParameterProvider::class)
   screenState: TodoListScreenState

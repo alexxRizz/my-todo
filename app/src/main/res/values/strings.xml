@@ -1,3 +1,13 @@
 <resources>
-  <string name="app_name">myToDo</string>
+  <string name="app_name" translatable="false">myTodo</string>
+  <string name="lists_title">Lists</string>
+  <string name="dialog_cancel">Cancel</string>
+  <string name="dialog_ok">OK</string>
+  <string name="edit_item_dialog_prompt">Enter description</string>
+  <string name="edit_item_dialog_title">Item editing</string>
+  <string name="edit_item_dialog_title_new">New item</string>
+  <string name="edit_list_dialog_title">List editing</string>
+  <string name="edit_list_dialog_title_new">New list</string>
+  <string name="no_lists_prompt">Add list</string>
+  <string name="no_items_prompt">Add item</string>
 </resources>

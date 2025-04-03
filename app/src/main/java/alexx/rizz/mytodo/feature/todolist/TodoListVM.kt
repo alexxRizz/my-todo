@@ -1,6 +1,7 @@
 package alexx.rizz.mytodo.feature.todolist
 
 import alexx.rizz.mytodo.feature.*
+import alexx.rizz.mytodo.feature.common.*
 import alexx.rizz.mytodo.feature.todolist.ui.components.*
 import androidx.lifecycle.*
 import dagger.hilt.android.lifecycle.*
@@ -14,6 +15,7 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class TodoListVM @Inject constructor(
   private val mTodoRep: ITodoRepository,
+  private val mResources: IResources,
 ) : ViewModeBase() {
 
   sealed interface UserIntent {
@@ -74,14 +76,14 @@ class TodoListVM @Inject constructor(
 
     private suspend fun onEditList(intent: UserIntent.EditList) {
       if (intent.id == TodoListId.Unknown) {
-        showEditDialog(TodoEditDialogState.List(title = "Новый список"))
+        showEditDialog(TodoEditDialogState.List(title = mResources.getString(ResStringId.EditListDialogTitleNew)))
         return
       }
       val list = mTodoRep.getListById(intent.id)
         ?: return
       showEditDialog(TodoEditDialogState.List(
         id = list.id,
-        title = "Редактирование списка",
+        title = mResources.getString(ResStringId.EditListDialogTitle),
         text = list.text,
         isDeleteVisible = true,
       ))
@@ -89,14 +91,14 @@ class TodoListVM @Inject constructor(
 
     private suspend fun onEditItem(intent: UserIntent.EditItem) {
       if (intent.id == TodoItemId.Unknown) {
-        showEditDialog(TodoEditDialogState.Item(title = "Новый пункт"))
+        showEditDialog(TodoEditDialogState.Item(title = mResources.getString(ResStringId.EditItemDialogTitleNew)))
         return
       }
       val item = mTodoRep.getItemById(intent.id)
         ?: return
       showEditDialog(TodoEditDialogState.Item(
         id = item.id,
-        title = "Редактирование пункта",
+        title = mResources.getString(ResStringId.EditItemDialogTitle),
         text = item.text,
         isDeleteVisible = true,
       ))
@@ -172,7 +174,7 @@ class TodoListVM @Inject constructor(
     ) { lists, items, editDialogState ->
       val listOwnerId = mListOwnerId.value
       val isListsVisible = listOwnerId == TodoListId.Unknown
-      val title = if (isListsVisible) "Списки" else lists.first { it.id == listOwnerId }.text
+      val title = getScreenTitle(isListsVisible, lists, listOwnerId)
       TodoListScreenState.Success(
         lists = lists,
         items = items,
@@ -183,4 +185,10 @@ class TodoListVM @Inject constructor(
       )
     }
   }
+
+  private fun getScreenTitle(isListsVisible: Boolean, lists: List<TodoList>, listOwnerId: TodoListId): String =
+    if (isListsVisible)
+      mResources.getString(ResStringId.ListsTitle)
+    else
+      lists.first { it.id == listOwnerId }.text
 }
