@@ -36,10 +36,9 @@ class TodoListVM @Inject constructor(
   }
 
   private val mEditDialogState = MutableStateFlow<TodoEditDialogState?>(null)
-  private val mListOwnerId = MutableStateFlow<TodoListId>(TodoListId.Unknown)
+  private var mListOwnerId = TodoListId.Unknown
 
   val screenState = newScreenState()
-    .onStart { mListOwnerId.value = mKeyValueService.getCurrentListOwnerId() }
     .stateIn(
       viewModelScope,
       SharingStarted.WhileSubscribed(5.seconds),
@@ -52,19 +51,20 @@ class TodoListVM @Inject constructor(
     }
 
   private fun newScreenState(): Flow<TodoListScreenState> {
-    val listsFlow = mTodoRep.listsFlow()
-    val itemsFlow = mListOwnerId.flatMapLatest { newListOwnerId ->
-      if (newListOwnerId == TodoListId.Unknown)
-        flowOf(emptyList())
-      else
-        mTodoRep.itemsFlow(newListOwnerId)
-    }
+    val listsFlow = mTodoRep.observeLists()
+    val itemsFlow = mKeyValueService.observeCurrentListOwnerId()
+      .flatMapLatest { newListOwnerId ->
+        mListOwnerId = newListOwnerId // сохраняем для последующего использования
+        if (newListOwnerId == TodoListId.Unknown)
+          flowOf(emptyList())
+        else
+          mTodoRep.observeItems(newListOwnerId)
+      }
     return combine(
       listsFlow, itemsFlow, mEditDialogState,
     ) { lists, items, editDialogState ->
-      val listOwnerId = mListOwnerId.value
-      val showLists = listOwnerId == TodoListId.Unknown
-      val title = getScreenTitle(showLists, lists, listOwnerId)
+      val showLists = mListOwnerId == TodoListId.Unknown
+      val title = getScreenTitle(showLists, lists, mListOwnerId)
       if (showLists)
         TodoListScreenState.SuccessLists(lists, title, editDialogState)
       else
@@ -152,7 +152,7 @@ class TodoListVM @Inject constructor(
     private fun onConfirmItemEditing(intent: UserIntent.ConfirmItemEditing) {
       viewModelScope.launch {
         if (intent.id == TodoItemId.Unknown)
-          mTodoRep.addItem(TodoItem(intent.text, isDone = false, listOwnerId = mListOwnerId.value))
+          mTodoRep.addItem(TodoItem(intent.text, isDone = false, listOwnerId = mListOwnerId))
         else
           mTodoRep.updateItem(intent.id, intent.text)
         hideEditDialog()
@@ -190,7 +190,6 @@ class TodoListVM @Inject constructor(
     }
 
     private suspend fun setListOwnerId(id: TodoListId) {
-      mListOwnerId.value = id
       mKeyValueService.setCurrentListOwnerId(id)
     }
   }

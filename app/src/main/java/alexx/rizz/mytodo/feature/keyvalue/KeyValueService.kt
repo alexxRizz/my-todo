@@ -1,11 +1,12 @@
 package alexx.rizz.mytodo.feature.keyvalue
 
 import alexx.rizz.mytodo.feature.todolist.*
+import kotlinx.coroutines.flow.*
 import javax.inject.*
 
 interface IKeyValueService {
 
-  suspend fun getCurrentListOwnerId(): TodoListId
+  fun observeCurrentListOwnerId(): Flow<TodoListId>
   suspend fun setCurrentListOwnerId(id: TodoListId)
 }
 
@@ -14,17 +15,19 @@ class KeyValueService @Inject constructor(
   private val mKeyValueRep: IKeyValueRepository
 ) : IKeyValueService {
 
-  override suspend fun getCurrentListOwnerId(): TodoListId {
-    val asInt = getInt(Keys.CurrentListOwnerId)
-    return if (asInt == null) TodoListId.Unknown else TodoListId(asInt)
-  }
+  override fun observeCurrentListOwnerId(): Flow<TodoListId> =
+    observeInt(Keys.CurrentListOwnerId)
+      .map { if (it == null) TodoListId.Unknown else TodoListId(it) }
 
   override suspend fun setCurrentListOwnerId(id: TodoListId) {
     setInt(Keys.CurrentListOwnerId, id.asInt)
   }
 
-  private suspend fun getInt(key: String): Int? =
-    mKeyValueRep.getValue(key)?.toIntOrNull()
+  private fun observeInt(key: String): Flow<Int?> =
+    mKeyValueRep.observeValue(key).map { it?.toIntOrNull() }
+
+  // private suspend fun getInt(key: String): Int? =
+  //   mKeyValueRep.getValue(key)?.toIntOrNull()
 
   private suspend fun setInt(key: String, value: Int) {
     mKeyValueRep.setValue(key, value.toString())
