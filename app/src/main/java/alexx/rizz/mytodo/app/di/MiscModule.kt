@@ -1,6 +1,7 @@
 package alexx.rizz.mytodo.app.di
 
 import alexx.rizz.mytodo.app.*
+import alexx.rizz.mytodo.app.resources.*
 import alexx.rizz.mytodo.db.*
 import dagger.*
 import dagger.hilt.*
@@ -14,5 +15,8 @@ interface MiscModule {
 
   @Binds
   fun mainDbProvider(value: MainDbInitializer): IMainDbProvider
+
+  @Binds
+  fun resources(value: Resources): IResources
 }
 

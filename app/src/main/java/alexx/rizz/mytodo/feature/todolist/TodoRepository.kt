@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.*
 import javax.inject.*
 
 interface ITodoRepository : IRepository {
-  fun observeItems(listOwnerId: TodoListId): Flow<List<TodoItem>>
+  fun itemsFlow(listOwnerId: TodoListId): Flow<List<TodoItem>>
   suspend fun getItemById(id: TodoItemId): TodoItem?
   suspend fun addItem(item: TodoItem)
   suspend fun doneItem(id: TodoItemId, isDone: Boolean)
@@ -15,7 +15,7 @@ interface ITodoRepository : IRepository {
   suspend fun removeItem(id: TodoItemId)
   suspend fun reorderItems(reordered: List<TodoItem>)
 
-  fun observeLists(): Flow<List<TodoList>>
+  fun listsFlow(): Flow<List<TodoList>>
   suspend fun getListById(id: TodoListId): TodoList?
   suspend fun addList(list: TodoList)
   suspend fun updateList(id: TodoListId, text: String)
@@ -33,7 +33,7 @@ class TodoRepository @Inject constructor(
   private val mItemDao get() = db.todoItem()
   private val mListDao get() = db.todoList()
 
-  override fun observeItems(listOwnerId: TodoListId): Flow<List<TodoItem>> =
+  override fun itemsFlow(listOwnerId: TodoListId): Flow<List<TodoItem>> =
     mItemDao
       .observeByListOwnerId(listOwnerId)
       .map { entities -> entities.map { it.toDomain() } }
@@ -69,7 +69,7 @@ class TodoRepository @Inject constructor(
     }
   }
 
-  override fun observeLists(): Flow<List<TodoList>> =
+  override fun listsFlow(): Flow<List<TodoList>> =
     mListDao
       .observeAll()
       .map { entities -> entities.map { it.toDomain() } }

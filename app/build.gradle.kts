@@ -44,6 +44,9 @@ android {
   kotlinOptions {
     jvmTarget = "17"
     freeCompilerArgs += "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
+    // раскомментировать для генерации отчетов о compose stability (собирать следует release)
+    // freeCompilerArgs += listOf("-P", "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" + project.projectDir.toPath().toString() + "/build/compose_metrics")
+    // freeCompilerArgs += listOf("-P", "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" + project.projectDir.toPath().toString() + "/build/compose_metrics")
   }
   buildFeatures {
     compose = true

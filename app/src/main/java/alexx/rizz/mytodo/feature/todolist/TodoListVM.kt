@@ -1,7 +1,8 @@
 package alexx.rizz.mytodo.feature.todolist
 
+import alexx.rizz.mytodo.app.resources.*
 import alexx.rizz.mytodo.feature.*
-import alexx.rizz.mytodo.feature.common.*
+import alexx.rizz.mytodo.feature.keyvalue.*
 import alexx.rizz.mytodo.feature.todolist.ui.*
 import androidx.lifecycle.*
 import dagger.hilt.android.lifecycle.*
@@ -14,8 +15,9 @@ import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class TodoListVM @Inject constructor(
-  private val mTodoRep: ITodoRepository,
   private val mResources: IResources,
+  private val mKeyValueService: IKeyValueService,
+  private val mTodoRep: ITodoRepository,
 ) : ViewModeBase() {
 
   sealed interface UserIntent {
@@ -36,16 +38,45 @@ class TodoListVM @Inject constructor(
   private val mEditDialogState = MutableStateFlow<TodoEditDialogState?>(null)
   private val mListOwnerId = MutableStateFlow<TodoListId>(TodoListId.Unknown)
 
-  val screenState = newScreenState().stateIn(
-    viewModelScope,
-    SharingStarted.WhileSubscribed(5.seconds),
-    initialValue = TodoListScreenState.Loading
-  )
+  val screenState = newScreenState()
+    .onStart { mListOwnerId.value = mKeyValueService.getCurrentListOwnerId() }
+    .stateIn(
+      viewModelScope,
+      SharingStarted.WhileSubscribed(5.seconds),
+      initialValue = TodoListScreenState.Loading
+    )
 
   fun onUserIntent(intent: UserIntent) =
     viewModelScope.launch {
       UserIntentHandler().handle(intent)
     }
+
+  private fun newScreenState(): Flow<TodoListScreenState> {
+    val listsFlow = mTodoRep.listsFlow()
+    val itemsFlow = mListOwnerId.flatMapLatest { newListOwnerId ->
+      if (newListOwnerId == TodoListId.Unknown)
+        flowOf(emptyList())
+      else
+        mTodoRep.itemsFlow(newListOwnerId)
+    }
+    return combine(
+      listsFlow, itemsFlow, mEditDialogState,
+    ) { lists, items, editDialogState ->
+      val listOwnerId = mListOwnerId.value
+      val showLists = listOwnerId == TodoListId.Unknown
+      val title = getScreenTitle(showLists, lists, listOwnerId)
+      if (showLists)
+        TodoListScreenState.SuccessLists(lists, title, editDialogState)
+      else
+        TodoListScreenState.SuccessItems(items, title, editDialogState)
+    }
+  }
+
+  private fun getScreenTitle(showLists: Boolean, lists: List<TodoList>, listOwnerId: TodoListId): String =
+    if (showLists)
+      mResources.getString(ResStringId.ListsTitle)
+    else
+      lists.first { it.id == listOwnerId }.text
 
   private inner class UserIntentHandler {
 
@@ -66,12 +97,12 @@ class TodoListVM @Inject constructor(
       }
     }
 
-    private fun onBack() {
-      mListOwnerId.value = TodoListId.Unknown
+    private suspend fun onBack() {
+      setListOwnerId(TodoListId.Unknown)
     }
 
-    private fun onShowListItems(intent: UserIntent.ShowListItems) {
-      mListOwnerId.value = intent.listOwnerId
+    private suspend fun onShowListItems(intent: UserIntent.ShowListItems) {
+      setListOwnerId(intent.listOwnerId)
     }
 
     private suspend fun onEditList(intent: UserIntent.EditList) {
@@ -157,34 +188,10 @@ class TodoListVM @Inject constructor(
     private fun hideEditDialog() {
       mEditDialogState.value = null
     }
-  }
 
-  private fun newScreenState(): Flow<TodoListScreenState> {
-    val listsFlow = mTodoRep.observeLists()
-    val itemsFlow = mListOwnerId.flatMapLatest { newListOwnerId ->
-      if (newListOwnerId == TodoListId.Unknown)
-        flowOf(emptyList())
-      else
-        mTodoRep.observeItems(newListOwnerId)
-    }
-    return combine(
-      listsFlow,
-      itemsFlow,
-      mEditDialogState,
-    ) { lists, items, editDialogState ->
-      val listOwnerId = mListOwnerId.value
-      val showLists = listOwnerId == TodoListId.Unknown
-      val title = getScreenTitle(showLists, lists, listOwnerId)
-      if (showLists)
-        TodoListScreenState.SuccessLists(lists, title, editDialogState)
-      else
-        TodoListScreenState.SuccessItems(items, title, editDialogState)
+    private suspend fun setListOwnerId(id: TodoListId) {
+      mListOwnerId.value = id
+      mKeyValueService.setCurrentListOwnerId(id)
     }
   }
-
-  private fun getScreenTitle(showLists: Boolean, lists: List<TodoList>, listOwnerId: TodoListId): String =
-    if (showLists)
-      mResources.getString(ResStringId.ListsTitle)
-    else
-      lists.first { it.id == listOwnerId }.text
 }

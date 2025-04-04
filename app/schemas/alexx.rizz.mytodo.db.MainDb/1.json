@@ -2,8 +2,32 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "22d9299fa62748b3986881ba933c9e11",
+    "identityHash": "56520f04701c13f1bd0479d9677a7158",
     "entities": [
+      {
+        "tableName": "keyValues",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`akey` TEXT NOT NULL, `value` TEXT NOT NULL, PRIMARY KEY(`akey`))",
+        "fields": [
+          {
+            "fieldPath": "key",
+            "columnName": "akey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "value",
+            "columnName": "value",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "akey"
+          ]
+        }
+      },
       {
         "tableName": "todoItems",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`text` TEXT NOT NULL, `isDone` INTEGER NOT NULL, `orderNumber` INTEGER NOT NULL, `listOwnerId` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)",
@@ -79,7 +103,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '22d9299fa62748b3986881ba933c9e11')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '56520f04701c13f1bd0479d9677a7158')"
     ]
   }
 }

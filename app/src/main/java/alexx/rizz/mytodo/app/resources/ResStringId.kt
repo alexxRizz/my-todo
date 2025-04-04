@@ -1,4 +1,4 @@
-package alexx.rizz.mytodo.feature.common
+package alexx.rizz.mytodo.app.resources
 
 import alexx.rizz.mytodo.*
 
