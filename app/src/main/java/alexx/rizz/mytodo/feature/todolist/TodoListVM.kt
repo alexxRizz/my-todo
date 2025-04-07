@@ -39,11 +39,7 @@ class TodoListVM @Inject constructor(
   private var mListOwnerId = TodoListId.Unknown
 
   val screenState = newScreenState()
-    .stateIn(
-      viewModelScope,
-      SharingStarted.WhileSubscribed(5.seconds),
-      initialValue = TodoListScreenState.Loading
-    )
+    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5.seconds), initialValue = TodoListScreenState.Loading)
 
   fun onUserIntent(intent: UserIntent) =
     viewModelScope.launch {
@@ -139,24 +135,20 @@ class TodoListVM @Inject constructor(
       hideEditDialog()
     }
 
-    private fun onConfirmListEditing(intent: UserIntent.ConfirmListEditing) {
-      viewModelScope.launch {
-        if (intent.id == TodoListId.Unknown)
-          mTodoRep.addList(TodoList(intent.text))
-        else
-          mTodoRep.updateList(intent.id, intent.text)
-        hideEditDialog()
-      }
+    private suspend fun onConfirmListEditing(intent: UserIntent.ConfirmListEditing) {
+      if (intent.id == TodoListId.Unknown)
+        mTodoRep.addList(TodoList(intent.text))
+      else
+        mTodoRep.updateList(intent.id, intent.text)
+      hideEditDialog()
     }
 
-    private fun onConfirmItemEditing(intent: UserIntent.ConfirmItemEditing) {
-      viewModelScope.launch {
-        if (intent.id == TodoItemId.Unknown)
-          mTodoRep.addItem(TodoItem(intent.text, isDone = false, listOwnerId = mListOwnerId))
-        else
-          mTodoRep.updateItem(intent.id, intent.text)
-        hideEditDialog()
-      }
+    private suspend fun onConfirmItemEditing(intent: UserIntent.ConfirmItemEditing) {
+      if (intent.id == TodoItemId.Unknown)
+        mTodoRep.addItem(TodoItem(intent.text, isDone = false, listOwnerId = mListOwnerId))
+      else
+        mTodoRep.updateItem(intent.id, intent.text)
+      hideEditDialog()
     }
 
     private suspend fun onDone(intent: UserIntent.Done) {

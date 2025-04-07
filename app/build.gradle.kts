@@ -1,4 +1,5 @@
 import org.gradle.api.JavaVersion
+import org.gradle.api.tasks.testing.Test
 
 plugins {
   alias(libs.plugins.android.application)
@@ -48,6 +49,14 @@ android {
     // freeCompilerArgs += listOf("-P", "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" + project.projectDir.toPath().toString() + "/build/compose_metrics")
     // freeCompilerArgs += listOf("-P", "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" + project.projectDir.toPath().toString() + "/build/compose_metrics")
   }
+  testOptions {
+    unitTests {
+      isIncludeAndroidResources = true
+      all {
+        it.systemProperties["robolectric.logging.enabled"] = "true"
+      }
+    }
+  }
   buildFeatures {
     compose = true
     buildConfig = true
@@ -68,14 +77,27 @@ dependencies {
   implementation(libs.androidx.ui.graphics)
   implementation(libs.androidx.ui.tooling.preview)
   implementation(libs.androidx.material3)
-  implementation(libs.kotlin.serialization.json)
-  implementation(libs.hilt.navigation.compose)
   implementation(libs.reorderable)
+  implementation(libs.kotlinx.serialization.json)
+  implementation(libs.kotlinx.coroutines)
 
-  testImplementation(libs.junit)
-  // androidTestImplementation(platform(libs.androidx.compose.bom))
   debugImplementation(libs.androidx.ui.tooling)
   debugImplementation(libs.androidx.ui.test.manifest)
+
+  // *** testing
+  testImplementation(libs.junit)
+  testRuntimeOnly(libs.junit5.vintage.engine)
+  testImplementation(platform(libs.junit5.bom))
+  testImplementation(libs.junit5.jupiter)
+  testImplementation(libs.junit5.pioneer)
+  testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation(libs.kotest.assertions.core)
+  testImplementation(libs.kotlin.fixture)
+  testImplementation(libs.classgraph)
+  testImplementation(libs.automockker)
+  testImplementation(libs.androidx.test.core)
+  testImplementation(libs.robolectric)
+  testImplementation(libs.mockk)
 
   // *** logging
   implementation(libs.slf4j)
@@ -88,5 +110,10 @@ dependencies {
 
   // *** hilt
   implementation(libs.hilt.android)
+  implementation(libs.hilt.navigation.compose)
   ksp(libs.hilt.compiler)
+}
+
+tasks.withType<Test> {
+  useJUnitPlatform()
 }

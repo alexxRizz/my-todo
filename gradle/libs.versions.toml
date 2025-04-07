@@ -6,8 +6,8 @@ compileSdk = "35"
 agp = "8.9.0"
 kotlin = "2.1.10"
 kotlinSerialization = "1.7.3"
+kotlinCoroutines = "1.10.1"
 coreKtx = "1.15.0"
-junit = "4.13.2"
 lifecycle = "2.8.7"
 activityCompose = "1.10.1"
 composeBom = "2025.03.00"
@@ -19,6 +19,18 @@ hilt = "2.56"
 hiltNavigationCompose = "1.2.0"
 slf4j = "1.7.36" # slf4j 2.x not yet supported by logback-android
 logbackAndroid = "2.0.1"
+
+# *** tests
+junit = "4.13.2"
+junit5 = "5.12.1"
+junit5Pioneer = "2.3.0"
+kotest = "5.9.1"
+kotlinFixture = "1.2.0"
+classgraph = "4.8.167"
+automockker = "0.0.3"
+androidxTestCore = "1.6.1"
+robolectric = "4.14.1"
+mockk = "1.13.17"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,11 +53,24 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.r
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 logback-android = { group = "com.github.tony19", name = "logback-android", version.ref = "logbackAndroid" }
-kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
+automockker = { module = "com.github.alexxRizz:AutoMockker", version.ref = "automockker" }
 
 # testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+junit5-bom = { module = "org.junit:junit-bom", version.ref = "junit5" }
+junit5-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit5" }
+junit5-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit5" }
+junit5-pioneer = { module = "org.junit-pioneer:junit-pioneer", version.ref = "junit5Pioneer" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTestCore" }
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinCoroutines" }
+kotlin-fixture = { module = "com.appmattus.fixture:fixture", version.ref = "kotlinFixture" }
+classgraph = { module = "io.github.classgraph:classgraph", version.ref = "classgraph" } # kotlinFixture может глючить без classgraph, проверить, может быть можно удалить
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -55,4 +80,3 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "room" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-
