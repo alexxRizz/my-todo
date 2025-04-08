@@ -1,5 +1,6 @@
 package alexx.rizz.mytodo.feature.todolist.ui.components
 
+import alexx.rizz.mytodo.R
 import alexx.rizz.mytodo.feature.todolist.*
 import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
 import alexx.rizz.mytodo.feature.todolist.ui.TodoListScreenCommon.RowPadding
@@ -14,6 +15,8 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.res.*
+import androidx.compose.ui.text.*
 import androidx.compose.ui.unit.*
 import sh.calvin.reorderable.*
 
@@ -73,18 +76,31 @@ private fun ReorderableCollectionItemScope.ListRow(
       Modifier.padding(RowPadding),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      ListText(list.text)
+      Column(modifier = Modifier.weight(1f)) {
+        ListText(list.text)
+        ItemCountText(list.doneCount, list.itemCount)
+      }
       EditButton(onClick = { onEditClick(list.id) })
     }
   }
 }
 
 @Composable
-private fun RowScope.ListText(text: String) {
+private fun ListText(text: String) {
   Text(
-    modifier = Modifier.weight(1f),
     text = text,
     fontSize = 18.sp,
+    lineHeight = 18.sp,
+  )
+}
+
+@Composable
+private fun ItemCountText(doneCount: Int, itemCount: Int) {
+  Text(
+    stringResource(R.string.numberOfNumber, doneCount, itemCount),
+    style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
+    fontSize = 12.sp,
+    color = MyColors.SecondaryCardText,
   )
 }
 

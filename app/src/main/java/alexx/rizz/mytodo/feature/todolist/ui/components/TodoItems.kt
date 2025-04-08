@@ -89,7 +89,7 @@ private fun ReorderableCollectionItemScope.ItemRow(
           animatedCrossScope.launchCrossAnimation(animatedCrossState)
       })
       Spacer(Modifier.width(10.dp))
-      ItemText(item.text, item.isDone)
+      ItemText(Modifier.weight(1f), item.text, item.isDone)
       EditButton(item.isDone, onEditClick)
     }
   }
@@ -113,11 +113,11 @@ private fun DoneCheckBox(
 }
 
 @Composable
-private fun RowScope.ItemText(text: String, isDone: Boolean) {
+private fun ItemText(modifier: Modifier, text: String, isDone: Boolean) {
   Text(
     text,
+    modifier = modifier,
     fontSize = 18.sp,
-    modifier = Modifier.weight(1f),
     color = if (isDone) LocalContentColor.current.copy(alpha = 0.7f) else LocalContentColor.current
   )
 }

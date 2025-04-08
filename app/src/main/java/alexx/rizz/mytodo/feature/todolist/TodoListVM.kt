@@ -137,7 +137,7 @@ class TodoListVM @Inject constructor(
 
     private suspend fun onConfirmListEditing(intent: UserIntent.ConfirmListEditing) {
       if (intent.id == TodoListId.Unknown)
-        mTodoRep.addList(TodoList(intent.text))
+        mTodoRep.addList(TodoList(intent.text, doneCount = 0, itemCount = 0))
       else
         mTodoRep.updateList(intent.id, intent.text)
       hideEditDialog()

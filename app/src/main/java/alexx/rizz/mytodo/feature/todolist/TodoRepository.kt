@@ -72,7 +72,7 @@ class TodoRepository @Inject constructor(
   override fun observeLists(): Flow<List<TodoList>> =
     mListDao
       .observeAll()
-      .map { entities -> entities.map { it.toDomain() } }
+      .map { entities -> entities.map(TodoListDto::toDomain) }
 
   override suspend fun getListById(id: TodoListId): TodoList? =
     mListDao.byId(id)?.toDomain()
@@ -119,15 +119,17 @@ private fun TodoItem.toEntity(sortId: Int): TodoItemEntity =
     id = this.id,
   )
 
-private fun TodoListEntity.toDomain(): TodoList =
+private fun TodoListDto.toDomain(): TodoList =
   TodoList(
-    id = this.id,
-    text = this.text,
+    text = this.entity.text,
+    doneCount = this.doneCount,
+    itemCount = this.itemCount,
+    id = this.entity.id,
   )
 
 private fun TodoList.toEntity(sortId: Int): TodoListEntity =
   TodoListEntity(
     text = this.text,
-    sordId = sortId,
+    sortId = sortId,
     id = this.id,
   )

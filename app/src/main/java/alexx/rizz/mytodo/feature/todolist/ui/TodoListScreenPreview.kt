@@ -16,7 +16,7 @@ private class TodoListScreenPreviewParameterProvider : PreviewParameterProvider<
       lists = List(20) {
         val i = it + 1
         val text = if (i % 3 == 0) "Lorem Ipsum is simply dummy text of the printing and typesetting industry." else "Todo $i"
-        TodoList(text, TodoListId(i))
+        TodoList(text, 0, 0, TodoListId(i))
       },
     ),
     TodoListScreenState.SuccessItems(

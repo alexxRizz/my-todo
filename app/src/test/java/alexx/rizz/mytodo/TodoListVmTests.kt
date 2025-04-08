@@ -59,18 +59,18 @@ class TodoListVmTests : SutTestsBase<TodoListVM>() {
 
   @Test
   fun should_be_SuccessLists_with_lists_from_db() = runTest {
-    mTodoRep.addList(TodoList("list1"))
-    mTodoRep.addList(TodoList("list2"))
+    mTodoRep.addList(TodoList("list1", 0, 0))
+    mTodoRep.addList(TodoList("list2", 0, 0))
 
     sut.screenState.value shouldBe TodoListScreenState.SuccessLists(listOf(
-      TodoList("list1", TodoListId(1)),
-      TodoList("list2", TodoListId(2)),
+      TodoList("list1", 0, 0, TodoListId(1)),
+      TodoList("list2", 0, 0, TodoListId(2)),
     ), ListsTitle)
   }
 
   @Test
   fun should_be_empty_SuccessItems_if_no_items_in_db() = runTest {
-    mTodoRep.addList(TodoList("list1"))
+    mTodoRep.addList(TodoList("list1", 0, 0))
     sut.onUserIntent(TodoListVM.UserIntent.ShowListItems(TodoListId(1)))
 
     sut.screenState.value shouldBe TodoListScreenState.SuccessItems(listOf(), "list1")
@@ -78,7 +78,7 @@ class TodoListVmTests : SutTestsBase<TodoListVM>() {
 
   @Test
   fun should_be_SuccessItems_with_items_from_db() = runTest {
-    mTodoRep.addList(TodoList("list1"))
+    mTodoRep.addList(TodoList("list1", 0, 0))
     mTodoRep.addItem(TodoItem("item1", false, TodoListId(1)))
     mTodoRep.addItem(TodoItem("item2", false, TodoListId(1)))
     sut.onUserIntent(TodoListVM.UserIntent.ShowListItems(TodoListId(1)))

@@ -9,4 +9,5 @@
   <string name="edit_list_dialog_title_new">Новый список</string>
   <string name="no_lists_prompt">Добавьте список</string>
   <string name="no_items_prompt">Добавьте пункт</string>
+  <string name="numberOfNumber">%d из %d</string>
 </resources>

@@ -10,4 +10,5 @@ object MyColors {
 
   val DoneCard = Primary.copy(alpha = 0.15f)
   val UndoneCard = Primary.copy(alpha = 0.33f)
+  val SecondaryCardText = Color(0xFF506D7B)
 }

@@ -10,4 +10,5 @@
   <string name="edit_list_dialog_title_new">New list</string>
   <string name="no_lists_prompt">Add list</string>
   <string name="no_items_prompt">Add item</string>
+  <string name="numberOfNumber">%d of %d</string>
 </resources>
