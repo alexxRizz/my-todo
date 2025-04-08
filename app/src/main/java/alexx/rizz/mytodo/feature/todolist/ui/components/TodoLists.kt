@@ -73,14 +73,26 @@ private fun ReorderableCollectionItemScope.ListRow(
       Modifier.padding(RowPadding),
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      Text(
-        modifier = Modifier.weight(1f),
-        text = list.text,
-        fontSize = 18.sp,
-      )
-      CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
-        IconButton(onClick = { onEditClick(list.id) }) { Icon(Icons.Default.Edit, null) }
-      }
+      ListText(list.text)
+      EditButton(onClick = { onEditClick(list.id) })
+    }
+  }
+}
+
+@Composable
+private fun RowScope.ListText(text: String) {
+  Text(
+    modifier = Modifier.weight(1f),
+    text = text,
+    fontSize = 18.sp,
+  )
+}
+
+@Composable
+private fun EditButton(onClick: () -> Unit) {
+  CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+    IconButton(onClick) {
+      Icon(Icons.Default.Edit, null)
     }
   }
 }

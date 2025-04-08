@@ -67,13 +67,13 @@ private fun ReorderableCollectionItemScope.ItemRow(
   val colors = CardDefaults.cardColors(
     containerColor = if (item.isDone) MyColors.DoneCard else MyColors.UndoneCard,
   )
-  val animatedCrossLine = rememberAnimatedCrossState()
-  val animatedCrossLinesScope = rememberCoroutineScope()
+  val animatedCrossState = rememberAnimatedCrossState()
+  val animatedCrossScope = rememberCoroutineScope()
   Card(
     modifier = Modifier
       .fillMaxWidth()
       .makeDraggable(this, interactionSource, haptic, onDragStopped)
-      .conditional(item.isDone, { drawCross(animatedCrossLine.line1.value, animatedCrossLine.line2.value) }),
+      .conditional(item.isDone, { drawCross(animatedCrossState.line1.value, animatedCrossState.line2.value) }),
     interactionSource = interactionSource,
     shape = RoundedCornerShape(5.dp),
     colors = colors,
@@ -86,11 +86,11 @@ private fun ReorderableCollectionItemScope.ItemRow(
       DoneCheckBox(item, onDoneClick = {
         onDoneClick(it)
         if (it)
-          animatedCrossLinesScope.launchCrossAnimation(animatedCrossLine)
+          animatedCrossScope.launchCrossAnimation(animatedCrossState)
       })
       Spacer(Modifier.width(10.dp))
       ItemText(item.text, item.isDone)
-      EditButton(onEditClick, item)
+      EditButton(item.isDone, onEditClick)
     }
   }
 }
@@ -123,11 +123,11 @@ private fun RowScope.ItemText(text: String, isDone: Boolean) {
 }
 
 @Composable
-private fun EditButton(onEditClick: () -> Unit, item: TodoItem) {
+private fun EditButton(isDone: Boolean, onClick: () -> Unit) {
   CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
-    IconButton(onEditClick) {
+    IconButton(onClick) {
       val editIcon = Icons.Default.Edit
-      val tint = editIcon.tintColor.copy(alpha = if (item.isDone) 0.35f else 1f)
+      val tint = editIcon.tintColor.copy(alpha = if (isDone) 0.35f else 1f)
       Icon(editIcon, null, tint = tint)
     }
   }
