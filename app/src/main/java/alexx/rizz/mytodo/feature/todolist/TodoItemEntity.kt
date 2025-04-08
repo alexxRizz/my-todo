@@ -6,7 +6,7 @@ import androidx.room.*
 data class TodoItemEntity(
   val text: String,
   val isDone: Boolean,
-  val orderNumber: Int,
+  val sortId: Int,
   val listOwnerId: TodoListId,
   @PrimaryKey(autoGenerate = true) val id: TodoItemId = TodoItemId.Unknown,
 )

@@ -3,7 +3,7 @@ minSdk = "22"
 targetSdk = "35"
 compileSdk = "35"
 
-agp = "8.9.0"
+agp = "8.9.1"
 kotlin = "2.1.10"
 kotlinSerialization = "1.7.3"
 kotlinCoroutines = "1.10.1"

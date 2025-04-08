@@ -21,15 +21,15 @@ interface TodoItemDao {
   @Query("SELECT COUNT(1) FROM todoItems")
   suspend fun count(): Int
 
-  @Query("SELECT * FROM todoItems WHERE listOwnerId=:listOwnerId ORDER BY orderNumber")
+  @Query("SELECT * FROM todoItems WHERE listOwnerId=:listOwnerId ORDER BY sortId")
   fun observeByListOwnerId(listOwnerId: TodoListId): Flow<List<TodoItemEntity>>
 
   @Query("SELECT * FROM todoItems WHERE id=:id")
   suspend fun byId(id: TodoItemId): TodoItemEntity?
 
-  @Query("SELECT MAX(orderNumber) FROM todoItems")
-  suspend fun getMaxOrderNumber(): Int
+  @Query("SELECT MAX(sortId) FROM todoItems")
+  suspend fun getMaxSortId(): Int
 
-  @Query("UPDATE todoItems SET orderNumber=:orderNumber WHERE id=:id")
-  suspend fun updateItemOrder(id: TodoItemId, orderNumber: Int)
+  @Query("UPDATE todoItems SET sortId=:sortId WHERE id=:id")
+  suspend fun updateItemOrder(id: TodoItemId, sortId: Int)
 }

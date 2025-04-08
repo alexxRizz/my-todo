@@ -43,8 +43,8 @@ class TodoRepository @Inject constructor(
 
   override suspend fun addItem(item: TodoItem) {
     db.withTransaction {
-      val maxOrderNumber = mItemDao.getMaxOrderNumber()
-      mItemDao.upsert(item.toEntity(maxOrderNumber + 1))
+      val maxSortId = mItemDao.getMaxSortId()
+      mItemDao.upsert(item.toEntity(maxSortId + 1))
     }
     Log.i("Added $item")
   }
@@ -79,8 +79,8 @@ class TodoRepository @Inject constructor(
 
   override suspend fun addList(list: TodoList) {
     inTransaction {
-      val maxOrderNumber = mListDao.getMaxOrderNumber()
-      mListDao.upsert(list.toEntity(maxOrderNumber + 1))
+      val maxSortId = mListDao.getMaxSortId()
+      mListDao.upsert(list.toEntity(maxSortId + 1))
     }
     Log.i("Added $list")
   }
@@ -110,11 +110,11 @@ private fun TodoItemEntity.toDomain(): TodoItem =
     listOwnerId = this.listOwnerId
   )
 
-private fun TodoItem.toEntity(orderNumber: Int): TodoItemEntity =
+private fun TodoItem.toEntity(sortId: Int): TodoItemEntity =
   TodoItemEntity(
     text = this.text,
     isDone = this.isDone,
-    orderNumber = orderNumber,
+    sortId = sortId,
     listOwnerId = this.listOwnerId,
     id = this.id,
   )
@@ -125,9 +125,9 @@ private fun TodoListEntity.toDomain(): TodoList =
     text = this.text,
   )
 
-private fun TodoList.toEntity(orderNumber: Int): TodoListEntity =
+private fun TodoList.toEntity(sortId: Int): TodoListEntity =
   TodoListEntity(
     text = this.text,
-    orderNumber = orderNumber,
+    sordId = sortId,
     id = this.id,
   )

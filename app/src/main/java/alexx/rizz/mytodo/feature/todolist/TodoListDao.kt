@@ -18,15 +18,15 @@ interface TodoListDao {
   @Query("SELECT COUNT(1) FROM todoLists")
   suspend fun count(): Int
 
-  @Query("SELECT * FROM todoLists ORDER BY orderNumber")
+  @Query("SELECT * FROM todoLists ORDER BY sordId")
   fun observeAll(): Flow<List<TodoListEntity>>
 
   @Query("SELECT * FROM todoLists WHERE id=:id")
   suspend fun byId(id: TodoListId): TodoListEntity?
 
-  @Query("SELECT MAX(orderNumber) FROM todoLists")
-  suspend fun getMaxOrderNumber(): Int
+  @Query("SELECT MAX(sordId) FROM todoLists")
+  suspend fun getMaxSortId(): Int
 
-  @Query("UPDATE todoLists SET orderNumber=:orderNumber WHERE id=:id")
-  suspend fun updateListOrder(id: TodoListId, orderNumber: Int)
+  @Query("UPDATE todoLists SET sordId=:sordId WHERE id=:id")
+  suspend fun updateListOrder(id: TodoListId, sordId: Int)
 }

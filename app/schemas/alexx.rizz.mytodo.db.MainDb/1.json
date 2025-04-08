@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "56520f04701c13f1bd0479d9677a7158",
+    "identityHash": "dc1deb8d8f5ce43771ece392dc2a4191",
     "entities": [
       {
         "tableName": "keyValues",
@@ -30,7 +30,7 @@
       },
       {
         "tableName": "todoItems",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`text` TEXT NOT NULL, `isDone` INTEGER NOT NULL, `orderNumber` INTEGER NOT NULL, `listOwnerId` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`text` TEXT NOT NULL, `isDone` INTEGER NOT NULL, `sortId` INTEGER NOT NULL, `listOwnerId` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)",
         "fields": [
           {
             "fieldPath": "text",
@@ -45,8 +45,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "orderNumber",
-            "columnName": "orderNumber",
+            "fieldPath": "sortId",
+            "columnName": "sortId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -72,7 +72,7 @@
       },
       {
         "tableName": "todoLists",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`text` TEXT NOT NULL, `orderNumber` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`text` TEXT NOT NULL, `sordId` INTEGER NOT NULL, `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)",
         "fields": [
           {
             "fieldPath": "text",
@@ -81,8 +81,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "orderNumber",
-            "columnName": "orderNumber",
+            "fieldPath": "sordId",
+            "columnName": "sordId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -103,7 +103,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '56520f04701c13f1bd0479d9677a7158')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dc1deb8d8f5ce43771ece392dc2a4191')"
     ]
   }
 }
