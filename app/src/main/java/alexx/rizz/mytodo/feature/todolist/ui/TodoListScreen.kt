@@ -3,11 +3,13 @@ package alexx.rizz.mytodo.feature.todolist.ui
 import alexx.rizz.mytodo.feature.todolist.*
 import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
 import alexx.rizz.mytodo.feature.todolist.ui.components.*
-import alexx.rizz.mytodo.ui.theme.MyColors
+import alexx.rizz.mytodo.ui.theme.*
 import androidx.activity.compose.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.shape.*
+import androidx.compose.material.icons.*
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -17,6 +19,7 @@ import androidx.lifecycle.compose.*
 
 object TodoListScreenCommon {
   val RowPadding = PaddingValues(10.dp, 5.dp, 0.dp, 5.dp)
+  const val CrossfadeBetweenItemsMillis = 300
 }
 
 @Composable
@@ -55,8 +58,9 @@ fun TodoListFloatingActionButton(
   onUserIntent: (UserIntent) -> Unit,
 ) {
   FloatingActionButton(
-    modifier = Modifier.offset(y = (-10).dp),
+    modifier = Modifier.offset(x = (-30).dp),
     containerColor = MyColors.Primary,
+    shape = RoundedCornerShape(50.dp),
     onClick = {
       val intent = if (isListsShown)
         UserIntent.EditList(TodoListId.Unknown)
@@ -65,7 +69,7 @@ fun TodoListFloatingActionButton(
       onUserIntent(intent)
     }
   ) {
-    Icon(Icons.Filled.Add, null)
+    Icon(Icons.Default.Add, null)
   }
 }
 

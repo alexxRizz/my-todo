@@ -3,7 +3,10 @@ package alexx.rizz.mytodo.feature.todolist.ui.components
 import alexx.rizz.mytodo.R
 import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
 import alexx.rizz.mytodo.feature.todolist.ui.*
+import alexx.rizz.mytodo.feature.todolist.ui.TodoListScreenCommon.CrossfadeBetweenItemsMillis
 import alexx.rizz.mytodo.ui.theme.*
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,11 +25,13 @@ fun TodoListSuccess(
     .fillMaxSize()
     .padding(10.dp, 5.dp, 10.dp, 10.dp)
   ) {
-    when (screenState) {
-      is TodoListScreenState.SuccessLists ->
-        TodoListsOrEmpty(Modifier.weight(1f), screenState, onUserIntent)
-      is TodoListScreenState.SuccessItems ->
-        TodoItemsOrEmpty(Modifier.weight(1f), screenState, onUserIntent)
+    Crossfade(targetState = screenState, animationSpec = tween(CrossfadeBetweenItemsMillis)) { screenState ->
+      when (screenState) {
+        is TodoListScreenState.SuccessLists ->
+          TodoListsOrEmpty(Modifier.weight(1f), screenState, onUserIntent)
+        is TodoListScreenState.SuccessItems ->
+          TodoItemsOrEmpty(Modifier.weight(1f), screenState, onUserIntent)
+      }
     }
     val editDialog = screenState.editDialog
     if (editDialog != null)
