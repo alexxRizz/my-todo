@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.res.*
 import androidx.compose.ui.text.*
 import androidx.compose.ui.unit.*
@@ -68,19 +69,21 @@ private fun ReorderableCollectionItemScope.ListRow(
       .fillMaxWidth()
       .makeDraggable(this, interactionSource, haptic, onDragStopped),
     interactionSource = interactionSource,
-    shape = RoundedCornerShape(5.dp),
-    colors = CardDefaults.cardColors(containerColor = MyColors.UndoneCard),
+    shape = RoundedCornerShape(7.dp),
+    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
     onClick = { onClick(list.id) },
   ) {
-    Row(
-      Modifier.padding(RowPadding),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Column(modifier = Modifier.weight(1f)) {
-        ListText(list.text)
-        ItemCountText(list.doneCount, list.itemCount)
+    Box(Modifier.drawBackground(MyColors.UndoneGradientColors)) {
+      Row(
+        Modifier.padding(RowPadding),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Column(modifier = Modifier.weight(1f)) {
+          ListText(list.text)
+          ItemCountText(list.doneCount, list.itemCount)
+        }
+        EditButton(onClick = { onEditClick(list.id) })
       }
-      EditButton(onClick = { onEditClick(list.id) })
     }
   }
 }

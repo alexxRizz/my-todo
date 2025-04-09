@@ -20,7 +20,7 @@ fun TodoListSuccess(
 ) {
   Column(modifier
     .fillMaxSize()
-    .padding(10.dp)
+    .padding(10.dp, 5.dp, 10.dp, 10.dp)
   ) {
     when (screenState) {
       is TodoListScreenState.SuccessLists ->

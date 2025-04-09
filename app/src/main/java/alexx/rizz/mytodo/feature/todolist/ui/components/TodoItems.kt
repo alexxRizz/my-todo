@@ -5,7 +5,6 @@ import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
 import alexx.rizz.mytodo.feature.todolist.ui.TodoListScreenCommon.RowPadding
 import alexx.rizz.mytodo.ui.*
 import alexx.rizz.mytodo.ui.theme.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.interaction.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -16,9 +15,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.*
-import androidx.compose.ui.geometry.*
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.*
-import kotlinx.coroutines.*
 import sh.calvin.reorderable.*
 
 @Composable
@@ -64,33 +62,27 @@ private fun ReorderableCollectionItemScope.ItemRow(
   onDragStopped: () -> Unit,
 ) {
   val interactionSource = remember { MutableInteractionSource() }
-  val colors = CardDefaults.cardColors(
-    containerColor = if (item.isDone) MyColors.DoneCard else MyColors.UndoneCard,
-  )
-  val animatedCrossState = rememberAnimatedCrossState()
-  val animatedCrossScope = rememberCoroutineScope()
+  val containerColor = if (item.isDone) MyColors.DoneCard else Color.Transparent
   Card(
     modifier = Modifier
-      .fillMaxWidth()
-      .makeDraggable(this, interactionSource, haptic, onDragStopped)
-      .conditional(item.isDone, { drawCross(animatedCrossState.line1.value, animatedCrossState.line2.value) }),
+      .makeDraggable(this, interactionSource, haptic, onDragStopped),
     interactionSource = interactionSource,
-    shape = RoundedCornerShape(5.dp),
-    colors = colors,
+    shape = RoundedCornerShape(7.dp),
+    colors = CardDefaults.cardColors(containerColor = containerColor),
     onClick = {},
   ) {
-    Row(
-      Modifier.padding(RowPadding),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      DoneCheckBox(item, onDoneClick = {
-        onDoneClick(it)
-        if (it)
-          animatedCrossScope.launchCrossAnimation(animatedCrossState)
-      })
-      Spacer(Modifier.width(10.dp))
-      ItemText(Modifier.weight(1f), item.text, item.isDone)
-      EditButton(item.isDone, onEditClick)
+    Box(Modifier.conditional(!item.isDone, { drawBackground(MyColors.UndoneGradientColors) })) {
+      Row(
+        Modifier.padding(RowPadding),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        DoneCheckBox(item, onDoneClick = {
+          onDoneClick(it)
+        })
+        Spacer(Modifier.width(10.dp))
+        ItemText(Modifier.weight(1f), item.text, item.isDone)
+        EditButton(item.isDone, onEditClick)
+      }
     }
   }
 }
@@ -118,6 +110,7 @@ private fun ItemText(modifier: Modifier, text: String, isDone: Boolean) {
     text,
     modifier = modifier,
     fontSize = 18.sp,
+    lineHeight = 18.sp,
     color = if (isDone) LocalContentColor.current.copy(alpha = 0.7f) else LocalContentColor.current
   )
 }
@@ -130,60 +123,5 @@ private fun EditButton(isDone: Boolean, onClick: () -> Unit) {
       val tint = editIcon.tintColor.copy(alpha = if (isDone) 0.35f else 1f)
       Icon(editIcon, null, tint = tint)
     }
-  }
-}
-
-private class AnimatedCrossState(
-  val line1: Animatable<Float, AnimationVector1D> = Animatable(1f),
-  val line2: Animatable<Float, AnimationVector1D> = Animatable(1f)
-)
-
-@Composable
-private fun rememberAnimatedCrossState(): AnimatedCrossState =
-  remember { AnimatedCrossState() }
-
-@Composable
-private fun Modifier.drawCross(animatedLine1: Float, animatedLine2: Float): Modifier =
-  drawBehind {
-    val xLeft = 83f
-    val yTop = 10f
-    val xRight = size.width - 20f
-    val yBottom = size.height - yTop
-    val crossColor = MyColors.UndoneCard
-    val strokeWidth = 5f
-    drawLine(
-      crossColor,
-      Offset(xLeft, yTop),
-      Offset(
-        xLeft - (xLeft - xRight) * animatedLine1,
-        yTop - (yTop - yBottom) * animatedLine1
-      ),
-      strokeWidth,
-    )
-    drawLine(
-      crossColor,
-      Offset(xRight, yTop),
-      Offset(
-        xRight - (xRight - xLeft) * animatedLine2,
-        yTop - (yTop - yBottom) * animatedLine2
-      ),
-      strokeWidth,
-    )
-  }
-
-private fun CoroutineScope.launchCrossAnimation(animatedCrossState: AnimatedCrossState) {
-  this.launch {
-    val targetValue = 1f
-    val durationMillis = 250
-    animatedCrossState.line1.snapTo(0f)
-    animatedCrossState.line2.snapTo(0f)
-    animatedCrossState.line1.animateTo(
-      targetValue = targetValue,
-      animationSpec = tween(durationMillis = durationMillis)
-    )
-    animatedCrossState.line2.animateTo(
-      targetValue = targetValue,
-      animationSpec = tween(durationMillis = durationMillis)
-    )
   }
 }
