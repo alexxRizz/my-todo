@@ -3,6 +3,7 @@ package alexx.rizz.mytodo.feature.todolist.ui.components
 import alexx.rizz.mytodo.R
 import alexx.rizz.mytodo.feature.todolist.*
 import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
+import alexx.rizz.mytodo.feature.todolist.ui.*
 import alexx.rizz.mytodo.feature.todolist.ui.TodoListScreenCommon.RowPadding
 import alexx.rizz.mytodo.ui.*
 import alexx.rizz.mytodo.ui.theme.*
@@ -64,36 +65,39 @@ private fun ReorderableCollectionItemScope.ListRow(
   onDragStopped: () -> Unit,
 ) {
   val interactionSource = remember { MutableInteractionSource() }
+  val isAllDone = list.isAllDone()
+  val containerColor = if (isAllDone) MyColors.DoneCard else Color.Transparent
   Card(
     modifier = Modifier
       .fillMaxWidth()
       .makeDraggable(this, interactionSource, haptic, onDragStopped),
     interactionSource = interactionSource,
     shape = RoundedCornerShape(7.dp),
-    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+    colors = CardDefaults.cardColors(containerColor = containerColor),
     onClick = { onClick(list.id) },
   ) {
-    Box(Modifier.drawBackground(MyColors.UndoneGradientColors)) {
+    Box(Modifier.conditional(!isAllDone, { drawBackground(MyColors.UndoneGradientColors) })) {
       Row(
         Modifier.padding(RowPadding),
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Column(modifier = Modifier.weight(1f)) {
-          ListText(list.text)
+          ListText(list.text, isAllDone)
           ItemCountText(list.doneCount, list.itemCount)
         }
-        EditButton(onClick = { onEditClick(list.id) })
+        EditButton(isAllDone, onClick = { onEditClick(list.id) })
       }
     }
   }
 }
 
 @Composable
-private fun ListText(text: String) {
+private fun ListText(text: String, isAllDone: Boolean) {
   Text(
     text = text,
     fontSize = 18.sp,
     lineHeight = 18.sp,
+    color = getItemTextColor(isAllDone)
   )
 }
 
@@ -108,10 +112,11 @@ private fun ItemCountText(doneCount: Int, itemCount: Int) {
 }
 
 @Composable
-private fun EditButton(onClick: () -> Unit) {
+private fun EditButton(isAllDone: Boolean, onClick: () -> Unit) {
   CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
     IconButton(onClick) {
-      Icon(Icons.Default.Edit, null)
+      val editIcon = Icons.Default.Edit
+      Icon(Icons.Default.Edit, null, tint = editIcon.tintColor.getItemButtonIconColor(isAllDone))
     }
   }
 }

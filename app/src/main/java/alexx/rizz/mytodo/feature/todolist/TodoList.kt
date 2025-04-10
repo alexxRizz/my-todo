@@ -7,3 +7,5 @@ data class TodoList(
   val id: TodoListId = TodoListId.Unknown,
 )
 
+fun TodoList.isAllDone(): Boolean =
+  doneCount == itemCount && itemCount > 0

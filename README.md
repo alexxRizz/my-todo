@@ -11,7 +11,7 @@
 * Списки можно переупорядочивать, перетаскивая элементы в нужные позиции
 
 ## Ключевые особенности реализации
-* Jetpack Compose
+* Jetpack Compose (без использования фрагментов, только одна Activity)
 * MVI - паттерн Model-View-Intent с соблюдением Unidirectional Data Flow
 * Реактивный подход с использованием kotlin.Flow для наблюдения за состоянием экранов приложения
 * Hilt (dependency injection)

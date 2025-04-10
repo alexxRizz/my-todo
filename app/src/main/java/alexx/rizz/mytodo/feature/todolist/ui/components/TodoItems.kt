@@ -2,6 +2,7 @@ package alexx.rizz.mytodo.feature.todolist.ui.components
 
 import alexx.rizz.mytodo.feature.todolist.*
 import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
+import alexx.rizz.mytodo.feature.todolist.ui.*
 import alexx.rizz.mytodo.feature.todolist.ui.TodoListScreenCommon.RowPadding
 import alexx.rizz.mytodo.ui.*
 import alexx.rizz.mytodo.ui.theme.*
@@ -76,9 +77,7 @@ private fun ReorderableCollectionItemScope.ItemRow(
         Modifier.padding(RowPadding),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        DoneCheckBox(item, onDoneClick = {
-          onDoneClick(it)
-        })
+        DoneCheckBox(item, onDoneClick = onDoneClick)
         Spacer(Modifier.width(10.dp))
         ItemText(Modifier.weight(1f), item.text, item.isDone)
         EditButton(item.isDone, onEditClick)
@@ -111,7 +110,7 @@ private fun ItemText(modifier: Modifier, text: String, isDone: Boolean) {
     modifier = modifier,
     fontSize = 18.sp,
     lineHeight = 18.sp,
-    color = if (isDone) LocalContentColor.current.copy(alpha = 0.7f) else LocalContentColor.current
+    color = getItemTextColor(isDone)
   )
 }
 
@@ -120,8 +119,7 @@ private fun EditButton(isDone: Boolean, onClick: () -> Unit) {
   CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
     IconButton(onClick) {
       val editIcon = Icons.Default.Edit
-      val tint = editIcon.tintColor.copy(alpha = if (isDone) 0.35f else 1f)
-      Icon(editIcon, null, tint = tint)
+      Icon(editIcon, null, tint = editIcon.tintColor.getItemButtonIconColor(isDone))
     }
   }
 }

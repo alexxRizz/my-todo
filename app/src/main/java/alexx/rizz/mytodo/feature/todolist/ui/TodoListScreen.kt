@@ -5,7 +5,6 @@ import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
 import alexx.rizz.mytodo.feature.todolist.ui.components.*
 import alexx.rizz.mytodo.ui.theme.*
 import androidx.activity.compose.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
 import androidx.compose.material.icons.*
@@ -16,11 +15,6 @@ import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.*
 import androidx.lifecycle.compose.*
-
-object TodoListScreenCommon {
-  val RowPadding = PaddingValues(10.dp, 5.dp, 0.dp, 5.dp)
-  const val CrossfadeBetweenItemsMillis = 300
-}
 
 @Composable
 fun TodoListScreen(vm: TodoListVM = hiltViewModel()) {
