@@ -4,7 +4,7 @@ import alexx.rizz.mytodo.ui.theme.*
 import android.os.*
 import androidx.activity.*
 import androidx.activity.compose.*
-import androidx.core.view.WindowCompat
+import androidx.core.view.*
 import dagger.hilt.android.*
 
 @AndroidEntryPoint

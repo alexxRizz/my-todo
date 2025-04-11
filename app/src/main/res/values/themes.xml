@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <style name="Theme.MyToDo" parent="android:Theme.Material.Light.NoActionBar"/>
+  <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar"/>
+  <style name="AppTheme.Launcher">
+    <item name="android:windowBackground">@drawable/launch_screen</item>
+    <!-- Для задания цвета top status bar -->
+    <item name="android:colorPrimaryDark">@color/primary</item>
+  </style>
 </resources>
