@@ -144,7 +144,7 @@ private fun DialogButtons(input: State<TextFieldValue>, onCancel: () -> Unit, on
 @Preview(locale = "ru", showBackground = true, showSystemUi = true)
 @Preview(locale = "en", showBackground = true, showSystemUi = true)
 private fun TodoItemEditDialogPreview() {
-  MyTodoTheme {
+  AppTheme {
     Box(
       contentAlignment = Alignment.Center,
       modifier = Modifier.fillMaxSize(),

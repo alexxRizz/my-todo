@@ -9,5 +9,7 @@
   <string name="edit_list_dialog_title_new">Новый список</string>
   <string name="no_lists_prompt">Добавьте список</string>
   <string name="no_items_prompt">Добавьте пункт</string>
-  <string name="numberOfNumber">%d из %d</string>
+  <string name="number_of_number">%d из %d</string>
+  <string name="main_menu_item_lists">Списки</string>
+  <string name="main_menu_item_settings">Настройки</string>
 </resources>

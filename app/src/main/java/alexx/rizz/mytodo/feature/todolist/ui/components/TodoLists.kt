@@ -104,7 +104,7 @@ private fun ListText(text: String, isAllDone: Boolean) {
 @Composable
 private fun ItemCountText(doneCount: Int, itemCount: Int) {
   Text(
-    stringResource(R.string.numberOfNumber, doneCount, itemCount),
+    stringResource(R.string.number_of_number, doneCount, itemCount),
     style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false)),
     fontSize = 12.sp,
     color = MyColors.SecondaryCardText,

@@ -12,9 +12,9 @@ inline fun Modifier.conditional(
   ifFalse: Modifier.() -> Modifier = { this },
 ): Modifier =
   if (condition)
-    then(ifTrue(Modifier))
+    this.ifTrue()
   else
-    then(ifFalse(Modifier))
+    this.ifFalse()
 
 @Composable
 fun <T> rememberUpdatedStateMutable(newValue: T): MutableState<T> =

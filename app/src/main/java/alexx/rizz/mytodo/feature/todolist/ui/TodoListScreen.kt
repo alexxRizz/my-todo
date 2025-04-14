@@ -17,7 +17,7 @@ import androidx.hilt.navigation.compose.*
 import androidx.lifecycle.compose.*
 
 @Composable
-fun TodoListScreen(vm: TodoListVM = hiltViewModel()) {
+fun TodoListScreen(vm: TodoListVM = hiltViewModel(), onMenuClick: () -> Unit = {}) {
   val screenState by vm.screenState.collectAsStateWithLifecycle()
   val successState = screenState as? TodoListScreenState.Success
   val isBackVisible = successState is TodoListScreenState.SuccessItems
@@ -30,7 +30,8 @@ fun TodoListScreen(vm: TodoListVM = hiltViewModel()) {
       TodoListTopBar(
         isBackVisible = isBackVisible,
         title = successState?.title ?: "",
-        onBack = { vm.onUserIntent(UserIntent.Back) }
+        onBackClick = { vm.onUserIntent(UserIntent.Back) },
+        onMenuClick = onMenuClick
       )
     },
     floatingActionButton = {

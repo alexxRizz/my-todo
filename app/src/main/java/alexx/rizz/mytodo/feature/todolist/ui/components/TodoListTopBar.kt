@@ -20,15 +20,16 @@ import androidx.compose.ui.unit.*
 fun TodoListTopBar(
   isBackVisible: Boolean,
   title: String,
-  onBack: () -> Unit,
+  onBackClick: () -> Unit,
+  onMenuClick: () -> Unit,
 ) {
   TopAppBar(
     modifier = Modifier
-      .heightIn(max = 65.dp)
+      .heightIn(max = 70.dp)
       .shadow(3.dp)
       .padding(bottom = 3.dp),
     navigationIcon = {
-      IconButton(onBack) {
+      IconButton(onClick = { if (isBackVisible) onBackClick() else onMenuClick() }) {
         Crossfade(targetState = isBackVisible, animationSpec = tween(CrossfadeBetweenItemsMillis)) { isBackVisible ->
           val icon = if (isBackVisible) Icons.AutoMirrored.Filled.ArrowBack else Icons.Default.Menu
           Icon(icon, null)

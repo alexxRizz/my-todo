@@ -36,7 +36,7 @@ private fun TodoListScreenPreview(
   @PreviewParameter(TodoListScreenPreviewParameterProvider::class)
   screenState: TodoListScreenState
 ) {
-  MyTodoTheme {
+  AppTheme {
     TodoListScreenContent(
       Modifier.safeDrawingPadding(),
       screenState,

@@ -1,5 +1,7 @@
 package alexx.rizz.mytodo.ui
 
+import alexx.rizz.mytodo.R
+import alexx.rizz.mytodo.ui.navigation.*
 import alexx.rizz.mytodo.ui.theme.*
 import android.os.*
 import androidx.activity.*
@@ -11,12 +13,15 @@ import dagger.hilt.android.*
 class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    /** Заменяем тему сплеш-скрина [R.style.AppTheme_Launcher] на тему приложения,
+     * иначе сплеш будет "вылезать" в самые неподходящие моменты, например, при закрытии drawer'a */
+    setTheme(R.style.AppTheme)
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setLightTextColorAtSystemStatusBar()
     setContent {
-      MyTodoTheme {
-        NavGraph()
+      AppTheme {
+        Navigation()
       }
     }
   }
