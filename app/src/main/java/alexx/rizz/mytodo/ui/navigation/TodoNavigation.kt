@@ -8,16 +8,18 @@ import alexx.rizz.mytodo.feature.todolist.ui.*
 import alexx.rizz.mytodo.ui.theme.*
 import android.annotation.*
 import androidx.activity.compose.*
-import androidx.annotation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.vector.*
 import androidx.compose.ui.res.*
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.text.style.*
@@ -26,21 +28,19 @@ import androidx.navigation.*
 import androidx.navigation.compose.*
 import kotlinx.coroutines.*
 
-private data class DrawerItem(
-  val icon: ImageVector,
-  @StringRes val textResId: Int,
-  val destination: TodoNavDestination,
+private val Items = listOf(
+  TodoDrawerItem(Icons.Default.Home, R.string.main_menu_item_lists, TodoNavDestination.TodoList),
+  TodoDrawerItem(Icons.Default.Settings, R.string.main_menu_item_settings, TodoNavDestination.Settings),
 )
 
-private val Items = listOf(
-  DrawerItem(Icons.Default.Home, R.string.main_menu_item_lists, TodoNavDestination.TodoList),
-  DrawerItem(Icons.Default.Settings, R.string.main_menu_item_settings, TodoNavDestination.Settings),
-)
+
+@OptIn(ExperimentalMaterial3Api::class)
+private val DrawerItemRippleConfiguration = RippleConfiguration(color = MyColors.Primary)
 
 private val Log = getLogger("Navigation")
 
 @Composable
-fun Navigation(
+fun TodoNavigation(
   navController: NavHostController = rememberNavController(),
   coroutineScope: CoroutineScope = rememberCoroutineScope(),
   drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
@@ -59,7 +59,7 @@ fun Navigation(
 @Composable
 private fun TodoModalDrawerSheet(navController: NavHostController, coroutineScope: CoroutineScope, drawerState: DrawerState) {
   ModalDrawerSheet(
-    modifier = Modifier.padding(end = 100.dp),
+    modifier = Modifier.padding(end = 100.dp).shadow(15.dp, RoundedCornerShape(10.dp)),
     drawerContainerColor = MyColors.Primary,
   ) {
     TodoDrawerContent(onMenuClick = { navDestination ->
@@ -75,6 +75,7 @@ private fun TodoModalDrawerSheet(navController: NavHostController, coroutineScop
   }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ColumnScope.TodoDrawerContent(onMenuClick: (TodoNavDestination) -> Unit) {
   Box(Modifier.fillMaxWidth()) {
@@ -92,26 +93,31 @@ fun ColumnScope.TodoDrawerContent(onMenuClick: (TodoNavDestination) -> Unit) {
     Modifier
       .fillMaxWidth()
       .weight(1f)
-      .background(Color.White) // TODO: ripple-эффект не работает, т.к. цвет фона drawer'a - MyColors.Primary
+      .background(Color.White)
       .padding(top = 16.dp)
   ) {
-    Items.forEachIndexed { i, item ->
-      NavigationDrawerItem(
-        icon = { Icon(item.icon, contentDescription = null) },
-        label = { Text(stringResource(item.textResId)) },
-        selected = i == selectedItemIndex,
-        colors = NavigationDrawerItemDefaults.colors(selectedContainerColor = MyColors.DoneCard),
-        shape = RectangleShape,
-        onClick = {
-          onMenuClick(item.destination)
-          selectedItemIndex = i
-        }
-      )
+    CompositionLocalProvider(LocalRippleConfiguration provides DrawerItemRippleConfiguration) {
+      Items.forEachIndexed { i, item ->
+        NavigationDrawerItem(
+          icon = { Icon(item.icon, contentDescription = null) },
+          label = { Text(stringResource(item.textResId)) },
+          selected = i == selectedItemIndex,
+          colors = NavigationDrawerItemDefaults.colors(
+            selectedContainerColor = MyColors.DoneCard,
+
+            ),
+          shape = RectangleShape,
+          onClick = {
+            onMenuClick(item.destination)
+            selectedItemIndex = i
+          }
+        )
+      }
     }
   }
   Text("v${BuildConfig.VERSION_NAME}",
     fontSize = 16.sp,
-    color = Color.Black,
+    color = MyColors.SecondaryCardText,
     textAlign = TextAlign.End,
     modifier = Modifier
       .fillMaxWidth()
