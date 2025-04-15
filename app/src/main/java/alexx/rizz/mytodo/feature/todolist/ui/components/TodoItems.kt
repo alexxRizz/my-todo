@@ -72,7 +72,9 @@ private fun ReorderableCollectionItemScope.ItemRow(
     colors = CardDefaults.cardColors(containerColor = containerColor),
     onClick = {},
   ) {
-    Box(Modifier.conditional(!item.isDone, { drawBackground(MyColors.UndoneGradientColors) })) {
+    Box(Modifier
+      .conditional(!item.isDone, { drawBackground(MyColors.UndoneGradientColors) })
+    ) {
       Row(
         Modifier.padding(RowPadding),
         verticalAlignment = Alignment.CenterVertically,

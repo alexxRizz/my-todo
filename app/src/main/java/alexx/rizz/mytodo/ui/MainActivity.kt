@@ -6,6 +6,7 @@ import alexx.rizz.mytodo.ui.theme.*
 import android.os.*
 import androidx.activity.*
 import androidx.activity.compose.*
+import androidx.compose.material3.*
 import androidx.core.view.*
 import dagger.hilt.android.*
 
@@ -21,7 +22,9 @@ class MainActivity : ComponentActivity() {
     setLightTextColorAtSystemStatusBar()
     setContent {
       AppTheme {
-        TodoNavigation()
+        Surface {
+          TodoNavigation()
+        }
       }
     }
   }

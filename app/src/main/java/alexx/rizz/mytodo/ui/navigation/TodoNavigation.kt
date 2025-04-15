@@ -10,15 +10,14 @@ import android.annotation.*
 import androidx.activity.compose.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.*
 import androidx.compose.material.icons.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.*
 import androidx.compose.ui.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.res.*
 import androidx.compose.ui.text.font.*
@@ -59,7 +58,9 @@ fun TodoNavigation(
 @Composable
 private fun TodoModalDrawerSheet(navController: NavHostController, coroutineScope: CoroutineScope, drawerState: DrawerState) {
   ModalDrawerSheet(
-    modifier = Modifier.padding(end = 100.dp).shadow(15.dp, RoundedCornerShape(10.dp)),
+    modifier = Modifier
+      .padding(end = 100.dp)
+      .shadow(15.dp, RoundedCornerShape(10.dp)),
     drawerContainerColor = MyColors.Primary,
   ) {
     TodoDrawerContent(onMenuClick = { navDestination ->
@@ -88,7 +89,7 @@ fun ColumnScope.TodoDrawerContent(onMenuClick: (TodoNavDestination) -> Unit) {
     )
   }
   HorizontalDivider()
-  var selectedItemIndex by remember { mutableIntStateOf(0) }
+  var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
   Column(modifier =
     Modifier
       .fillMaxWidth()
