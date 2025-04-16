@@ -1,9 +1,8 @@
 package alexx.rizz.mytodo.feature.todolist.ui.components
 
-import alexx.rizz.mytodo.feature.todolist.ui.TodoListScreenCommon.CrossfadeBetweenItemsMillis
+import alexx.rizz.mytodo.feature.todolist.ui.commonInAndOutTransform
 import alexx.rizz.mytodo.ui.theme.*
 import androidx.compose.animation.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.*
 import androidx.compose.material.icons.automirrored.filled.*
@@ -29,15 +28,21 @@ fun TodoListTopBar(
       .shadow(3.dp)
       .padding(bottom = 3.dp),
     navigationIcon = {
-      IconButton(onClick = { if (isBackVisible) onBackClick() else onMenuClick() }) {
-        Crossfade(targetState = isBackVisible, animationSpec = tween(CrossfadeBetweenItemsMillis)) { isBackVisible ->
+      AnimatedContent(
+        targetState = isBackVisible,
+        transitionSpec = { commonInAndOutTransform() }
+      ) { isBackVisible ->
+        IconButton(onClick = { if (isBackVisible) onBackClick() else onMenuClick() }) {
           val icon = if (isBackVisible) Icons.AutoMirrored.Filled.ArrowBack else Icons.Default.Menu
           Icon(icon, null)
         }
       }
     },
     title = {
-      Crossfade(targetState = title, animationSpec = tween(CrossfadeBetweenItemsMillis)) { title ->
+      AnimatedContent(
+        targetState = title,
+        transitionSpec = { commonInAndOutTransform() },
+      ) { title ->
         Text(title)
       }
     },
