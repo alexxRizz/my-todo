@@ -61,10 +61,14 @@ class TodoListVM @Inject constructor(
     ) { lists, items, editDialogState ->
       val showLists = mListOwnerId == TodoListId.Unknown
       val title = getScreenTitle(showLists, lists, mListOwnerId)
-      if (showLists)
-        TodoListScreenState.SuccessLists(lists, title, editDialogState)
+      val listContent = if (showLists)
+        TodoListScreenState.SuccessLists(lists)
       else
-        TodoListScreenState.SuccessItems(items, title, editDialogState)
+        TodoListScreenState.SuccessItems(items)
+      TodoListScreenState.Success(
+        title,
+        TodoListScreenState.SuccessListState(listContent, editDialogState)
+      )
     }
   }
 

@@ -1,5 +1,6 @@
 package alexx.rizz.mytodo.feature.todolist.ui
 
+import alexx.rizz.mytodo.feature.common.*
 import alexx.rizz.mytodo.feature.todolist.*
 import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
 import alexx.rizz.mytodo.feature.todolist.ui.components.*
@@ -20,23 +21,27 @@ import androidx.lifecycle.compose.*
 fun TodoListScreen(vm: TodoListVM = hiltViewModel(), onMenuClick: () -> Unit = {}) {
   val screenState by vm.screenState.collectAsStateWithLifecycle()
   val successState = screenState as? TodoListScreenState.Success
-  val isBackVisible = successState is TodoListScreenState.SuccessItems
-  BackHandler(enabled = isBackVisible) {
+  BackHandler(enabled = successState?.navButtonType == NavButtonType.Back) {
     vm.onUserIntent(UserIntent.Back)
   }
   Scaffold(
     modifier = Modifier.fillMaxSize(),
     topBar = {
       TodoListTopBar(
-        isBackVisible = isBackVisible,
-        title = successState?.title ?: "",
-        onBackClick = { vm.onUserIntent(UserIntent.Back) },
-        onMenuClick = onMenuClick
+        icon = successState?.navButtonType?.toTopBarIcon(),
+        title = successState?.title,
+        onClick = {
+          when (successState?.navButtonType) {
+            NavButtonType.Menu -> onMenuClick()
+            NavButtonType.Back -> vm.onUserIntent(UserIntent.Back)
+            null -> Unit
+          }
+        },
       )
     },
     floatingActionButton = {
       if (successState != null)
-        TodoListFloatingActionButton(successState is TodoListScreenState.SuccessLists, vm::onUserIntent)
+        TodoListFloatingActionButton(successState.listState.content.contentType, onUserIntent = vm::onUserIntent)
     }
   ) { innerPadding ->
     TodoListScreenContent(
@@ -49,7 +54,7 @@ fun TodoListScreen(vm: TodoListVM = hiltViewModel(), onMenuClick: () -> Unit = {
 
 @Composable
 fun TodoListFloatingActionButton(
-  isListsShown: Boolean,
+  listContentType: TodoListScreenState.ListContentType,
   onUserIntent: (UserIntent) -> Unit,
 ) {
   FloatingActionButton(
@@ -57,11 +62,11 @@ fun TodoListFloatingActionButton(
     containerColor = MyColors.Primary,
     shape = RoundedCornerShape(50.dp),
     onClick = {
-      val intent = if (isListsShown)
-        UserIntent.EditList(TodoListId.Unknown)
-      else
-        UserIntent.EditItem(TodoItemId.Unknown)
-      onUserIntent(intent)
+      val userIntent = when (listContentType) {
+        TodoListScreenState.ListContentType.Lists -> UserIntent.EditList(TodoListId.Unknown)
+        TodoListScreenState.ListContentType.Items -> UserIntent.EditItem(TodoItemId.Unknown)
+      }
+      onUserIntent(userIntent)
     }
   ) {
     Icon(Icons.Default.Add, null)
@@ -76,6 +81,6 @@ fun TodoListScreenContent(
 ) {
   when (screenState) {
     TodoListScreenState.Loading -> TodoListLoading(modifier)
-    is TodoListScreenState.Success -> TodoListSuccess(modifier, screenState, onUserIntent)
+    is TodoListScreenState.Success -> TodoListSuccess(modifier, screenState.listState, onUserIntent)
   }
 }

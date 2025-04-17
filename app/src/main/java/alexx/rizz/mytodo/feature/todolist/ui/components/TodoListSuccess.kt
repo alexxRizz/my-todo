@@ -1,11 +1,11 @@
 package alexx.rizz.mytodo.feature.todolist.ui.components
 
 import alexx.rizz.mytodo.R
+import alexx.rizz.mytodo.feature.todolist.*
 import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
 import alexx.rizz.mytodo.feature.todolist.ui.*
 import alexx.rizz.mytodo.ui.theme.*
 import androidx.compose.animation.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,25 +17,26 @@ import androidx.compose.ui.unit.*
 @Composable
 fun TodoListSuccess(
   modifier: Modifier,
-  screenState: TodoListScreenState.Success,
+  listState: TodoListScreenState.SuccessListState,
   onUserIntent: (UserIntent) -> Unit,
 ) {
   Column(modifier
     .fillMaxSize()
     .padding(10.dp, 5.dp, 10.dp, 10.dp)
   ) {
-    AnimatedContent(
-      targetState = screenState,
+    rememberTransition(initialState = null, targetState = listState.content).AnimatedContent(
+      contentKey = { it?.contentType }, // иначе анимация будет срабатывать при добавлении / удалении айтемов
       transitionSpec = { commonInAndOutTransform() }
-    ) { screenState ->
-      when (screenState) {
+    ) { content ->
+      when (content) {
         is TodoListScreenState.SuccessLists ->
-          TodoListsOrEmpty(Modifier.weight(1f), screenState, onUserIntent)
+          TodoListsOrEmpty(Modifier.weight(1f), content.lists, onUserIntent)
         is TodoListScreenState.SuccessItems ->
-          TodoItemsOrEmpty(Modifier.weight(1f), screenState, onUserIntent)
+          TodoItemsOrEmpty(Modifier.weight(1f), content.items, onUserIntent)
+        null -> Unit
       }
     }
-    val editDialog = screenState.editDialog
+    val editDialog = listState.editDialog
     if (editDialog != null)
       TodoEditDialog(editDialog, onUserIntent)
   }
@@ -44,15 +45,15 @@ fun TodoListSuccess(
 @Composable
 private fun TodoListsOrEmpty(
   modifier: Modifier,
-  screenState: TodoListScreenState.SuccessLists,
+  lists: List<TodoList>,
   onUserIntent: (UserIntent) -> Unit
 ) {
-  if (screenState.lists.isEmpty())
+  if (lists.isEmpty())
     TodoListEmpty(modifier, stringResource(R.string.no_lists_prompt))
   else
     TodoLists(
       modifier,
-      screenState.lists,
+      lists,
       onClick = { id -> onUserIntent(UserIntent.ShowListItems(id)) },
       onEditClick = { id -> onUserIntent(UserIntent.EditList(id)) },
       onDragStopped = { onUserIntent(it) },
@@ -62,15 +63,15 @@ private fun TodoListsOrEmpty(
 @Composable
 private fun TodoItemsOrEmpty(
   modifier: Modifier,
-  screenState: TodoListScreenState.SuccessItems,
+  items: List<TodoItem>,
   onUserIntent: (UserIntent) -> Unit
 ) {
-  if (screenState.items.isEmpty())
+  if (items.isEmpty())
     TodoListEmpty(modifier, stringResource(R.string.no_items_prompt))
   else
     TodoItems(
       modifier,
-      screenState.items,
+      items,
       onDoneClick = { id, isDone -> onUserIntent(UserIntent.Done(id, isDone)) },
       onEditClick = { id -> onUserIntent(UserIntent.EditItem(id)) },
       onDragStopped = { onUserIntent(it) },

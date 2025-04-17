@@ -1,7 +1,5 @@
 package alexx.rizz.mytodo.feature.todolist.ui
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,10 +16,3 @@ fun getItemTextColor(isDone: Boolean): Color =
 
 fun Color.getItemButtonIconColor(isDone: Boolean): Color =
   this.copy(alpha = if (isDone) 0.35f else 1f)
-
-fun <S> AnimatedContentTransitionScope<S>.commonInAndOutTransform(): ContentTransform {
-  val duration = tween<Float>(500)
-  val enter = fadeIn(duration) + scaleIn(duration)
-  val exit = fadeOut(duration) + scaleOut(duration)
-  return enter togetherWith exit using SizeTransform(clip = false)
-}

@@ -1,6 +1,7 @@
 package alexx.rizz.mytodo.feature.settings.ui
 
 import alexx.rizz.mytodo.R
+import alexx.rizz.mytodo.feature.common.*
 import alexx.rizz.mytodo.feature.todolist.ui.components.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -15,10 +16,9 @@ fun SettingsScreen(onMenuClick: () -> Unit = {}) {
     modifier = Modifier.fillMaxSize(),
     topBar = {
       TodoListTopBar(
-        isBackVisible = false,
+        icon = NavButtonType.Menu.toTopBarIcon(),
         title = stringResource(R.string.main_menu_item_settings),
-        onBackClick = {},
-        onMenuClick = onMenuClick
+        onClick = onMenuClick,
       )
     },
   ) { innerPadding ->
@@ -31,15 +31,3 @@ fun SettingsScreen(onMenuClick: () -> Unit = {}) {
     }
   }
 }
-
-// @Composable
-// fun TodoListScreenContent(
-//   modifier: Modifier,
-//   screenState: TodoListScreenState,
-//   onUserIntent: (UserIntent) -> Unit,
-// ) {
-//   when (screenState) {
-//     TodoListScreenState.Loading -> TodoListLoading(modifier)
-//     is TodoListScreenState.Success -> TodoListSuccess(modifier, screenState, onUserIntent)
-//   }
-// }
