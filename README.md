@@ -22,7 +22,8 @@
 * Поддержка русского и английского языков
 * После перезапуска приложения открывается сразу последний открытый список,
   если таковой был на момент завершения приложения
-* TODO: type-safe compose navigation, main hamburger menu (navigation drawer)
+* Navigation drawer + Type safe navigation
+* Логирование изменений back stack'а (стека экранов) для удобства отладки
 
 ### MVI
 

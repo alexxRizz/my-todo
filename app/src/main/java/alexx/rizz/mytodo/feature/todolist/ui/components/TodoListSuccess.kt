@@ -4,6 +4,7 @@ import alexx.rizz.mytodo.R
 import alexx.rizz.mytodo.feature.todolist.*
 import alexx.rizz.mytodo.feature.todolist.TodoListVM.*
 import alexx.rizz.mytodo.feature.todolist.ui.*
+import alexx.rizz.mytodo.ui.*
 import alexx.rizz.mytodo.ui.theme.*
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
@@ -24,7 +25,8 @@ fun TodoListSuccess(
     .fillMaxSize()
     .padding(10.dp, 5.dp, 10.dp, 10.dp)
   ) {
-    rememberTransition(initialState = null, targetState = listState.content).AnimatedContent(
+    val initialState = if (isPreview) listState.content else null // иначе в Preview будет пусто
+    rememberTransition(initialState = initialState, targetState = listState.content).AnimatedContent(
       contentKey = { it?.contentType }, // иначе анимация будет срабатывать при добавлении / удалении айтемов
       transitionSpec = { commonInAndOutTransform() }
     ) { content ->

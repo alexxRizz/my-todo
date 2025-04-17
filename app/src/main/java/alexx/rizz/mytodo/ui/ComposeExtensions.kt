@@ -33,6 +33,9 @@ fun PaddingValues.copy(
   bottom = bottom
 )
 
+val isPreview: Boolean @Composable get() =
+  LocalInspectionMode.current
+
 // Может пригодиться
 // fun Modifier.selectAllOnFocus(input: MutableState<TextFieldValue>): Modifier =
 //   this.onFocusChanged {

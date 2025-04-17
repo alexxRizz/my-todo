@@ -20,9 +20,18 @@ import androidx.lifecycle.compose.*
 @Composable
 fun TodoListScreen(vm: TodoListVM = hiltViewModel(), onMenuClick: () -> Unit = {}) {
   val screenState by vm.screenState.collectAsStateWithLifecycle()
+  TodoListScreenContent(screenState, vm::onUserIntent, onMenuClick)
+}
+
+@Composable
+fun TodoListScreenContent(
+  screenState: TodoListScreenState,
+  onUserIntent: (UserIntent) -> Unit,
+  onMenuClick: () -> Unit,
+) {
   val successState = screenState as? TodoListScreenState.Success
   BackHandler(enabled = successState?.navButtonType == NavButtonType.Back) {
-    vm.onUserIntent(UserIntent.Back)
+    onUserIntent(UserIntent.Back)
   }
   Scaffold(
     modifier = Modifier.fillMaxSize(),
@@ -33,7 +42,7 @@ fun TodoListScreen(vm: TodoListVM = hiltViewModel(), onMenuClick: () -> Unit = {
         onClick = {
           when (successState?.navButtonType) {
             NavButtonType.Menu -> onMenuClick()
-            NavButtonType.Back -> vm.onUserIntent(UserIntent.Back)
+            NavButtonType.Back -> onUserIntent(UserIntent.Back)
             null -> Unit
           }
         },
@@ -41,19 +50,19 @@ fun TodoListScreen(vm: TodoListVM = hiltViewModel(), onMenuClick: () -> Unit = {
     },
     floatingActionButton = {
       if (successState != null)
-        TodoListFloatingActionButton(successState.listState.content.contentType, onUserIntent = vm::onUserIntent)
+        TodoListFloatingActionButton(successState.listState.content.contentType, onUserIntent = onUserIntent)
     }
   ) { innerPadding ->
-    TodoListScreenContent(
-      Modifier.padding(innerPadding),
-      screenState,
-      vm::onUserIntent,
-    )
+    val modifier = Modifier.padding(innerPadding)
+    when (screenState) {
+      TodoListScreenState.Loading -> TodoListLoading(modifier)
+      is TodoListScreenState.Success -> TodoListSuccess(modifier, screenState.listState, onUserIntent)
+    }
   }
 }
 
 @Composable
-fun TodoListFloatingActionButton(
+private fun TodoListFloatingActionButton(
   listContentType: TodoListScreenState.ListContentType,
   onUserIntent: (UserIntent) -> Unit,
 ) {
@@ -70,17 +79,5 @@ fun TodoListFloatingActionButton(
     }
   ) {
     Icon(Icons.Default.Add, null)
-  }
-}
-
-@Composable
-fun TodoListScreenContent(
-  modifier: Modifier,
-  screenState: TodoListScreenState,
-  onUserIntent: (UserIntent) -> Unit,
-) {
-  when (screenState) {
-    TodoListScreenState.Loading -> TodoListLoading(modifier)
-    is TodoListScreenState.Success -> TodoListSuccess(modifier, screenState.listState, onUserIntent)
   }
 }

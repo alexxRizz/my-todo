@@ -32,7 +32,6 @@ private val Items = listOf(
   TodoDrawerItem(Icons.Default.Settings, R.string.main_menu_item_settings, TodoNavDestination.Settings),
 )
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 private val DrawerItemRippleConfiguration = RippleConfiguration(color = MyColors.Primary)
 
@@ -85,7 +84,7 @@ fun ColumnScope.TodoDrawerContent(onMenuClick: (TodoNavDestination) -> Unit) {
       fontWeight = FontWeight.Bold,
       color = Color.White,
       modifier = Modifier
-        .padding(16.dp)
+        .padding(start = 16.dp, top = 13.dp, end = 16.dp, bottom = 13.dp)
     )
   }
   HorizontalDivider()

@@ -21,9 +21,9 @@ fun TodoListTopBar(
 ) {
   TopAppBar(
     modifier = Modifier
-      .heightIn(max = 70.dp)
       .shadow(3.dp)
       .padding(bottom = 3.dp),
+    expandedHeight = 50.dp,
     navigationIcon = {
       AnimatedContent(
         targetState = icon,
