@@ -73,20 +73,25 @@ private fun TodoEditDialogContent(
           .fillMaxWidth(),
       ) {
         Row {
-          Text(text = title, fontSize = 20.sp) // title
+          Text(text = title, fontSize = 20.sp)
           if (isDeleteVisible) {
             Spacer(Modifier.weight(1f))
-            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
-              IconButton(onDelete, modifier = Modifier.offset(7.dp, (-10).dp)) {
-                Icon(Icons.Default.Delete, null, tint = Color.Red)
-              }
-            }
+            DeleteButton(onDelete)
           }
         }
         val input = remember { mutableStateOf(TextFieldValue(text, TextRange(0, text.length))) }
         DescriptionTextField(input, onTextChanged)
         DialogButtons(input, onCancel, onOk)
       }
+    }
+  }
+}
+
+@Composable
+private fun DeleteButton(onClick: () -> Unit) {
+  CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+    IconButton(onClick, modifier = Modifier.offset(7.dp, (-10).dp)) {
+      Icon(Icons.Default.Delete, null, tint = Color.Red)
     }
   }
 }
