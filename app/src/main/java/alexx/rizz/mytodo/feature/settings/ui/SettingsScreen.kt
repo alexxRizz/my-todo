@@ -2,16 +2,19 @@ package alexx.rizz.mytodo.feature.settings.ui
 
 import alexx.rizz.mytodo.R
 import alexx.rizz.mytodo.feature.common.*
+import alexx.rizz.mytodo.feature.todolist.ui.*
 import alexx.rizz.mytodo.feature.todolist.ui.components.*
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.res.*
 import androidx.compose.ui.unit.*
 
 @Composable
-fun SettingsScreen(onMenuClick: () -> Unit = {}) {
+fun SettingsScreen(onMenuClick: () -> Unit) {
   Scaffold(
     modifier = Modifier.fillMaxSize(),
     topBar = {
@@ -27,7 +30,10 @@ fun SettingsScreen(onMenuClick: () -> Unit = {}) {
       .padding(innerPadding),
       contentAlignment = Alignment.Center
     ) {
-      Text("TODO", fontSize = 24.sp)
+      rememberTransition(initialState = "", targetState = "TODO").AnimatedContent(
+        transitionSpec = { commonInAndOutTransform() }) { text ->
+        Text(text, fontSize = 24.sp, color = Color.Gray)
+      }
     }
   }
 }

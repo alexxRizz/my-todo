@@ -4,6 +4,7 @@ import alexx.rizz.mytodo.app.logging.*
 import alexx.rizz.mytodo.feature.settings.ui.*
 import alexx.rizz.mytodo.feature.todolist.ui.*
 import android.annotation.*
+import androidx.compose.animation.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.navigation.*
@@ -52,14 +53,20 @@ private fun navigate(
 
 @Composable
 private fun TodoNavHost(navController: NavHostController, startDestination: TodoNavDestination, drawerState: DrawerState, coroutineScope: CoroutineScope) {
-  NavHost(navController, startDestination = startDestination) {
+  val onMenuClick = { coroutineScope.launchOpenDrawer(drawerState) }
+  NavHost(
+    navController,
+    startDestination = startDestination,
+    enterTransition = { EnterTransition.None },
+    exitTransition = { ExitTransition.None },
+  ) {
     composable<TodoNavDestination.TodoList> {
       CloseDrawerOnBackPressed(drawerState, coroutineScope)
-      TodoListScreen(onMenuClick = { coroutineScope.launchOpenDrawer(drawerState) })
+      TodoListScreen(onMenuClick = onMenuClick)
     }
     composable<TodoNavDestination.Settings> {
       CloseDrawerOnBackPressed(drawerState, coroutineScope)
-      SettingsScreen(onMenuClick = { coroutineScope.launchOpenDrawer(drawerState) })
+      SettingsScreen(onMenuClick = onMenuClick)
     }
   }
 }

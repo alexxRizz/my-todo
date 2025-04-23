@@ -25,8 +25,7 @@ fun TodoListSuccess(
     .fillMaxSize()
     .padding(10.dp, 5.dp, 10.dp, 10.dp)
   ) {
-    val initialState = if (isPreview) listState.content else null // иначе в Preview будет пусто
-    rememberTransition(initialState = initialState, targetState = listState.content).AnimatedContent(
+    rememberTransition(initialState = null, targetState = listState.content).AnimatedContent(
       contentKey = { it?.contentType }, // иначе анимация будет срабатывать при добавлении / удалении айтемов
       transitionSpec = { commonInAndOutTransform() }
     ) { content ->

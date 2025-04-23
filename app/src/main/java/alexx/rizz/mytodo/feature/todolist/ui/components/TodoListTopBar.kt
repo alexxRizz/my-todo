@@ -25,8 +25,7 @@ fun TodoListTopBar(
       .padding(bottom = 3.dp),
     expandedHeight = 50.dp,
     navigationIcon = {
-      AnimatedContent(
-        targetState = icon,
+      rememberTransition(initialState = null, targetState = icon).AnimatedContent(
         transitionSpec = { commonInAndOutTransform() }
       ) { icon ->
         if (icon != null)
@@ -34,8 +33,7 @@ fun TodoListTopBar(
       }
     },
     title = {
-      AnimatedContent(
-        targetState = title,
+      rememberTransition(initialState = null, targetState = title).AnimatedContent(
         transitionSpec = { commonInAndOutTransform() },
       ) { title ->
         if (title != null)
